@@ -1,0 +1,51 @@
+# Redirect old .html and prefixed paths to flat clean URLs
+
+# Index
+/index.html                     /                               301
+
+# Core Pages
+/about.html                     /about                          301
+/contact.html                   /contact                        301
+/privacy-policy.html            /privacy-policy                 301
+
+# Services (old /services/ prefix -> flat root URLs)
+/services/spray-foam-insulation      /spray-foam-insulation          301
+/services/spray-foam-insulation/     /spray-foam-insulation          301
+/spray-foam-insulation.html          /spray-foam-insulation          301
+
+/services/injection-foam-insulation  /injection-foam-insulation      301
+/services/injection-foam-insulation/ /injection-foam-insulation      301
+/injection-foam-insulation.html     /injection-foam-insulation      301
+
+/services/attic-insulation           /attic-insulation               301
+/services/attic-insulation/          /attic-insulation               301
+/attic-insulation.html               /attic-insulation               301
+
+/services/air-sealing                /air-sealing                    301
+/services/air-sealing/               /air-sealing                    301
+/air-sealing.html                    /air-sealing                    301
+
+/services/attic-fan-ventilation      /attic-fan-ventilation          301
+/services/attic-fan-ventilation/     /attic-fan-ventilation          301
+/attic-fan-ventilation.html          /attic-fan-ventilation          301
+
+/services                            /contact                        301
+/services/                           /contact                        301
+/services.html                       /contact                        301
+
+# Service Areas (old /service-areas/ prefix -> flat root URLs)
+/service-areas/conroe                /insulation-conroe              301
+/service-areas/conroe/               /insulation-conroe              301
+/insulation-conroe.html              /insulation-conroe              301
+
+/service-areas/cypress               /insulation-cypress             301
+/service-areas/cypress/              /insulation-cypress             301
+/insulation-cypress.html             /insulation-cypress             301
+
+/service-areas/tomball               /insulation-tomball             301
+/service-areas/tomball/              /insulation-tomball             301
+/insulation-tomball.html             /insulation-tomball             301
+
+/service-areas                       /contact                        301
+/service-areas/                      /contact                        301
+/service-areas.html                  /contact                        301
