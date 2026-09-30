@@ -294,8 +294,10 @@
 
 <div id="trust-strip-container">
   <section class="trust-strip" aria-label="Service guarantees">
-    <div class="shell trust-grid">
-      <div><span>01</span><p><strong>Licensed and Insured in Texas</strong></p></div><div><span>02</span><p><strong>Written Estimate Before Any Work</strong></p></div><div><span>03</span><p><strong>Confirmed Arrival Window</strong></p></div>
+    <div class="shell trust-grid" style="grid-template-columns:repeat(3,1fr);gap:0;">
+      <div style="padding-right:2rem;border-right:1px solid var(--line);"><span>01</span><p><strong>Licensed and Insured in Texas</strong></p></div>
+      <div style="padding:0 2rem;border-right:1px solid var(--line);"><span>02</span><p><strong>Written Estimate Before Any Work</strong></p></div>
+      <div style="padding-left:2rem;"><span>03</span><p><strong>Confirmed Arrival Window</strong></p></div>
     </div>
   </section>
 </div>
