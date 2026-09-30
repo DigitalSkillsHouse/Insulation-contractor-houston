@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://usainsulationofnorthswhouston.com/sitemap.xml
+Sitemap: https://insulationcontractorhouston.com/sitemap.xml
