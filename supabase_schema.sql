@@ -141,7 +141,7 @@ INSERT INTO public.site_settings (id, phone, email, address, hours)
 VALUES (
     1,
     '+1 409-996-4620',
-    'info@usainsulationofnorthswhouston.com',
+    'info@insulationcontractorhouston.com',
     '23407 Snook Ln Bldg 1, Tomball, TX 77375',
     'Open 24 hours · 7 days a week'
 )

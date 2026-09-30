@@ -1,6 +1,6 @@
-# USA Insulation of North & SW Houston
+# Insulation Contractor Houston
 
-This is a professional website for USA Insulation of North & SW Houston, specializing in services.
+This is a professional website for Insulation Contractor Houston, specializing in services.
 
 ## Files Included
 

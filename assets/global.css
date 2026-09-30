@@ -650,16 +650,16 @@
 
 /* --- Header & Footer Logo Styles --- */
 .brand-logo {
-  height: 56px;
+  height: 76px;
   width: auto;
-  max-width: 320px;
+  max-width: 380px;
   object-fit: contain;
   display: block;
 }
 .brand-logo-footer {
-  height: 64px;
+  height: 90px;
   width: auto;
-  max-width: 320px;
+  max-width: 400px;
   object-fit: contain;
   display: block;
   background: transparent !important;
@@ -719,3 +719,5 @@
     height: 24px !important;
   }
 }
+
+.request-heading h2, .request-heading .request-title { font-size: 20px; font-weight: 800; color: var(--teal-900); display: block; margin: 0; line-height: 1.2; }
