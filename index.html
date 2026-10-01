@@ -146,7 +146,11 @@
     <meta property="og:title" content="Attic Insulation Cypress TX | Insulation Contractor in Cypress, TX">
     <meta property="og:description" content="Attic insulation in Cypress TX for Cy-Fair homes built in the 1980s and 1990s. Licensed contractor 10 minutes from Cypress on Hwy 249. Free estimates — call +1 409-996-4620.">
     <meta property="og:url" content="https://insulationcontractorhouston.com/">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2032%2032%27%3E%3Crect%20width=%2732%27%20height=%2732%27%20rx=%277%27%20fill=%27%23f6a97f%27/%3E%3Ctext%20x=%2716%27%20y=%2723%27%20font-family=%27Arial,sans-serif%27%20font-size=%2719%27%20font-weight=%27700%27%20fill=%27%23ffffff%27%20text-anchor=%27middle%27%3EU%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Insulation Contractor Houston" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" as="image" href="assets/images/gen/index-dec67a5d.webp" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -210,9 +214,11 @@
   },true);
 })();
 </script>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Insulation Contractor Houston" />
+  <link rel="manifest" href="/site.webmanifest" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-44WSYC407H"></script>
   <script>
@@ -297,13 +303,47 @@
 
 <div id="trust-strip-container">
   <section class="trust-strip" aria-label="Service guarantees">
-    <div class="shell trust-grid" style="grid-template-columns:repeat(3,1fr);gap:0;">
-      <div style="padding-right:2rem;border-right:1px solid var(--line);"><span>01</span><p><strong>Licensed and Insured in Texas</strong></p></div>
-      <div style="padding:0 2rem;border-right:1px solid var(--line);"><span>02</span><p><strong>Written Estimate Before Any Work</strong></p></div>
-      <div style="padding-left:2rem;"><span>03</span><p><strong>Confirmed Arrival Window</strong></p></div>
+    <div class="shell trust-grid home-trust-grid">
+      <div class="htg-item"><span>01</span><p><strong>Licensed and Insured in Texas</strong></p></div>
+      <div class="htg-item"><span>02</span><p><strong>Written Estimate Before Any Work</strong></p></div>
+      <div class="htg-item htg-last"><span>03</span><p><strong>Confirmed Arrival Window</strong></p></div>
     </div>
   </section>
 </div>
+<style>
+  .home-trust-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .home-trust-grid .htg-item {
+    padding: 0 2rem;
+    border-right: 1px solid var(--line);
+  }
+  .home-trust-grid .htg-item:first-child {
+    padding-left: 0;
+  }
+  .home-trust-grid .htg-last {
+    border-right: none;
+    padding-right: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .home-trust-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .home-trust-grid .htg-item {
+      padding: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+    }
+    .home-trust-grid .htg-last {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+</style>
 
 
       <!-- RL-AUTO:services-section START -->
