@@ -262,4 +262,36 @@ document.addEventListener("DOMContentLoaded", () => {
   initNewsletter();
   initLeadForms();
   initReveal();
+  initFaqStack();
 });
+
+function initFaqStack() {
+  const stack = document.getElementById("faq-accordion");
+  if (!stack) return;
+  const articles = stack.querySelectorAll("article");
+  // Open first item by default
+  if (articles[0]) {
+    articles[0].classList.add("open");
+    const btn = articles[0].querySelector("button");
+    if (btn) btn.setAttribute("aria-expanded", "true");
+  }
+  articles.forEach((article) => {
+    const btn = article.querySelector("button");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      const isOpen = article.classList.contains("open");
+      // Close all
+      articles.forEach((a) => {
+        a.classList.remove("open");
+        const b = a.querySelector("button");
+        if (b) b.setAttribute("aria-expanded", "false");
+      });
+      // Toggle clicked
+      if (!isOpen) {
+        article.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+}
+

@@ -143,6 +143,6 @@ VALUES (
     '+1 409-996-4620',
     'info@insulationcontractorhouston.com',
     '23407 Snook Ln Bldg 1, Tomball, TX 77375',
-    'Open 24 hours · 7 days a week'
+    'Mon–Fri 9am–6pm'
 )
 ON CONFLICT (id) DO NOTHING;

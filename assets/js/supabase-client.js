@@ -230,7 +230,7 @@
         phone: '+1 409-996-4620',
         email: 'info@insulationcontractorhouston.com',
         address: '23407 Snook Ln Bldg 1, Tomball, TX 77375',
-        hours: 'Open 24 hours · 7 days a week'
+        hours: 'Mon–Fri 9am–6pm'
       };
 
       try {

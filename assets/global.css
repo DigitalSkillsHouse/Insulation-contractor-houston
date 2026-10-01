@@ -650,16 +650,16 @@
 
 /* --- Header & Footer Logo Styles --- */
 .brand-logo {
-  height: 76px;
+  height: 48px;
   width: auto;
-  max-width: 380px;
+  max-width: 280px;
   object-fit: contain;
   display: block;
 }
 .brand-logo-footer {
-  height: 90px;
+  height: 58px;
   width: auto;
-  max-width: 400px;
+  max-width: 290px;
   object-fit: contain;
   display: block;
   background: transparent !important;
@@ -721,3 +721,91 @@
 }
 
 .request-heading h2, .request-heading .request-title { font-size: 20px; font-weight: 800; color: var(--teal-900); display: block; margin: 0; line-height: 1.2; }
+
+/* ─── Prose column layouts (no boxes) ─────────────────────── */
+.prose-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 44px; }
+.prose-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 48px; margin-top: 44px; }
+.prose-col { }
+.prose-col .benefit-number { display: block; margin-bottom: 10px; }
+.prose-col h3 { font-size: 18px; color: var(--teal-900); margin-bottom: 10px; }
+.prose-col p { color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+.prose-faq {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.prose-faq p { text-align: left; }
+.prose-faq-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 12px;
+  align-items: baseline;
+}
+.prose-faq-label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.prose-faq-label.q-label {
+  background: var(--accent);
+  color: #fff;
+}
+.prose-faq-label.a-label {
+  background: var(--cream-2);
+  color: var(--teal-900);
+}
+.prose-faq-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.prose-faq-text.q-text {
+  font-weight: 700;
+  color: var(--teal-900);
+  font-size: 13.5px;
+}
+
+/* ─── Section with image split ─────────────────────────────── */
+.section-img-split { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: center; }
+.section-img-split.reverse .section-img-wrap { order: -1; }
+.section-img-wrap { position: relative; border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-sm); }
+.section-img-wrap img { width: 100%; height: 100%; object-fit: cover; min-height: 320px; display: block; }
+.section-img-label { display: none !important; }
+
+/* ─── Steps row ─────────────────────────────────────────────── */
+.steps-row { display: grid; grid-template-columns: 1fr 1fr; gap: 36px 60px; margin-top: 40px; }
+.step-item { display: flex; flex-direction: column; gap: 0; }
+.step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px; flex: none; margin-bottom: 14px; }
+.step-item h3 { font-size: 18px; color: var(--teal-900); margin-bottom: 10px; }
+.step-item p { color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+
+/* ─── FAQ accordion full-width variant ─────────────────────── */
+.faq-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 32px; }
+.faq-stack article { background: #fff; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+.faq-stack article.open { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+.faq-stack button { width: 100%; display: flex; align-items: center; gap: 16px; padding: 20px 24px; border: none; background: none; cursor: pointer; font-family: inherit; text-align: left; }
+.faq-stack button strong { color: var(--teal-900); font-size: 15.5px; flex: 1; font-weight: 700; }
+.faq-stack button b { font-size: 22px; color: var(--accent-dark); font-weight: 400; flex: none; transition: transform 0.25s; }
+.faq-stack article.open button b { transform: rotate(45deg); }
+.faq-stack .faq-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+.faq-stack article.open .faq-panel { max-height: 300px; }
+.faq-stack .faq-panel p { padding: 0 24px 20px 24px; color: var(--muted); font-size: 14.5px; line-height: 1.7; }
+
+/* ─── Responsive prose/steps ─────────────────────────────────── */
+@media (max-width: 820px) {
+  .prose-cols, .prose-cols-3, .steps-row, .section-img-split { grid-template-columns: 1fr; }
+  .section-img-split.reverse .section-img-wrap { order: 0; }
+}
+
