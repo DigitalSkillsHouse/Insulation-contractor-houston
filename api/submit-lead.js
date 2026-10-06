@@ -1,9 +1,6 @@
 // api/submit-lead.js
 export const config = { runtime: 'edge' };
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-
 function jsonResponse(data, status) {
   return new Response(JSON.stringify(data), {
     status,
@@ -13,18 +10,18 @@ function jsonResponse(data, status) {
   });
 }
 
-// Fail closed if required server configuration is missing.
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('[submit-lead] Required Supabase environment variables are missing.');
-}
-
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // Never attempt a database request with missing credentials/configuration.
+  // Resolve environment variables per request in Edge runtime
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+  // Fail closed if required server configuration is missing.
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error('[submit-lead] Required Supabase environment variables are missing.');
     return jsonResponse({ error: 'Service temporarily unavailable' }, 503);
   }
 
@@ -41,26 +38,30 @@ export default async function handler(req) {
     return jsonResponse({ success: true }, 200);
   }
 
+  // Safe string extraction & validation
+  const nameVal = (typeof body.name === 'string' ? body.name : String(body.name || '')).trim();
+  const phoneVal = (typeof body.phone === 'string' ? body.phone : String(body.phone || '')).trim();
+
   // Required field validation
-  if (!body.name?.trim() && !body.phone?.trim()) {
+  if (!nameVal && !phoneVal) {
     return jsonResponse({ error: 'Name or phone required' }, 422);
   }
 
   const generateId = () =>
-    'USA-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+    'ICH-' + Math.random().toString(36).slice(2, 10).toUpperCase();
 
   const payload = {
     lead_id:      generateId(),
-    name:         (body.name || 'Anonymous').slice(0, 255),
-    phone:        (body.phone || '').slice(0, 50),
-    email:        (body.email || '').slice(0, 255),
-    zip:          (body.zip || '').slice(0, 20),
-    city:         (body.city || 'Spring Area, TX').slice(0, 100),
-    service:      (body.service || 'Attic Insulation').slice(0, 100),
-    type:         (body.type || 'Form Submission').slice(0, 50),
+    name:         (nameVal || 'Anonymous').slice(0, 255),
+    phone:        phoneVal.slice(0, 50),
+    email:        (typeof body.email === 'string' ? body.email : '').trim().slice(0, 255),
+    zip:          (typeof body.zip === 'string' ? body.zip : '').trim().slice(0, 20),
+    city:         (typeof body.city === 'string' ? body.city : 'Spring Area, TX').trim().slice(0, 100),
+    service:      (typeof body.service === 'string' ? body.service : 'Attic Insulation').trim().slice(0, 100),
+    type:         (typeof body.type === 'string' ? body.type : 'Form Submission').trim().slice(0, 50),
     status:       'new',
-    notes:        (body.message || '').slice(0, 5000),
-    page_url:     (body.pageUrl || '').slice(0, 2000),
+    notes:        (typeof body.notes === 'string' ? body.notes : typeof body.message === 'string' ? body.message : '').trim().slice(0, 5000),
+    page_url:     (typeof body.pageUrl === 'string' ? body.pageUrl : '').trim().slice(0, 2000),
     submitted_at: new Date().toISOString()
   };
 
@@ -96,3 +97,4 @@ export default async function handler(req) {
     }, 503);
   }
 }
+

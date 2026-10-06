@@ -1,5 +1,5 @@
 -- ========================================================
--- USA Insulation - Supabase Database Setup Schema
+-- Insulation Contractor Houston - Supabase Database Setup Schema
 -- Copy and paste this script into your Supabase Dashboard:
 -- Supabase Project -> SQL Editor -> New Query -> Run
 -- ========================================================

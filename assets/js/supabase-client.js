@@ -1,5 +1,5 @@
 /**
- * USA Insulation - Supabase Database Integration Client
+ * Insulation Contractor Houston - Supabase Database Integration Client
  * Handles lead persistence via edge API and admin panel data operations.
  */
 
@@ -26,7 +26,7 @@
   }
 
   // Global API Interface
-  window.USA_SUPABASE = {
+  window.ICH_SUPABASE = {
     getClient: getClient,
 
     /**
@@ -67,8 +67,11 @@
       try {
         const sb = getClient();
         if (sb) {
-          const { error } = await sb.from(TABLE_NAME).update({ status }).eq('lead_id', leadId);
+          const { data, error } = await sb.from(TABLE_NAME).update({ status }).eq('lead_id', leadId).select();
           if (error) throw error;
+          if (!Array.isArray(data) || data.length === 0) {
+            throw new Error(`Supabase updateStatus affected 0 rows for lead_id: ${leadId}`);
+          }
           console.log(`[Supabase] Updated status for ${leadId} -> ${status}`);
           return true;
         }
@@ -85,8 +88,11 @@
       try {
         const sb = getClient();
         if (sb) {
-          const { error } = await sb.from(TABLE_NAME).update({ notes }).eq('lead_id', leadId);
+          const { data, error } = await sb.from(TABLE_NAME).update({ notes }).eq('lead_id', leadId).select();
           if (error) throw error;
+          if (!Array.isArray(data) || data.length === 0) {
+            throw new Error(`Supabase updateNotes affected 0 rows for lead_id: ${leadId}`);
+          }
           console.log(`[Supabase] Updated notes for ${leadId}`);
           return true;
         }
@@ -104,8 +110,11 @@
       try {
         const sb = getClient();
         if (sb) {
-          const { error } = await sb.from(TABLE_NAME).update({ value: numValue }).eq('lead_id', leadId);
+          const { data, error } = await sb.from(TABLE_NAME).update({ value: numValue }).eq('lead_id', leadId).select();
           if (error) throw error;
+          if (!Array.isArray(data) || data.length === 0) {
+            throw new Error(`Supabase updateValue affected 0 rows for lead_id: ${leadId}`);
+          }
           console.log(`[Supabase] Updated value for ${leadId} -> $${numValue}`);
           return true;
         }
@@ -148,11 +157,38 @@
       };
 
       try {
-        const saved = localStorage.getItem('usa_site_settings');
+        const saved = localStorage.getItem('ich_site_settings') || localStorage.getItem('usa_site_settings');
         if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
       } catch (e) {}
 
       return DEFAULT_SETTINGS;
+    },
+
+    /**
+     * Fetch remote site settings from Supabase database (Asynchronous background sync)
+     */
+    async fetchSettings() {
+      const current = this.getSettings();
+      try {
+        const sb = getClient();
+        if (sb) {
+          const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).maybeSingle();
+          if (!error && data) {
+            const updated = {
+              phone: data.phone || current.phone,
+              email: data.email || current.email,
+              address: data.address || current.address,
+              hours: data.hours || current.hours
+            };
+            localStorage.setItem('ich_site_settings', JSON.stringify(updated));
+            this.applySettingsToDOM(updated);
+            return updated;
+          }
+        }
+      } catch (e) {
+        console.warn('[Supabase Settings Fetch Notice]:', e.message);
+      }
+      return current;
     },
 
     /**
@@ -161,7 +197,7 @@
     async saveSettings(newSettings) {
       const current = this.getSettings();
       const updated = { ...current, ...newSettings };
-      localStorage.setItem('usa_site_settings', JSON.stringify(updated));
+      localStorage.setItem('ich_site_settings', JSON.stringify(updated));
 
       try {
         const sb = getClient();
@@ -216,10 +252,13 @@
     }
   };
 
+  // Backward compatibility alias for legacy scripts
+  window.USA_SUPABASE = window.ICH_SUPABASE;
+
   // Helper to map DB columns to frontend lead structure
   function mapSupabaseLeads(dbLeads) {
     return dbLeads.map(l => ({
-      id: l.lead_id || l.id || 'USA-0000',
+      id: l.lead_id || l.id || 'ICH-0000',
       name: l.name || 'Anonymous',
       phone: l.phone || '',
       email: l.email || '',
@@ -238,8 +277,11 @@
   // DOM initialization
   document.addEventListener('DOMContentLoaded', () => {
     // Apply saved site settings across DOM
-    if (window.USA_SUPABASE && typeof window.USA_SUPABASE.applySettingsToDOM === 'function') {
-      window.USA_SUPABASE.applySettingsToDOM();
+    if (window.ICH_SUPABASE && typeof window.ICH_SUPABASE.applySettingsToDOM === 'function') {
+      window.ICH_SUPABASE.applySettingsToDOM();
+      if (typeof window.ICH_SUPABASE.fetchSettings === 'function') {
+        window.ICH_SUPABASE.fetchSettings();
+      }
     }
 
     // Automatic Phone Call Click Capture
@@ -252,13 +294,13 @@
           email: '',
           zip: 'Spring Area',
           service: 'Phone Inquiry',
-          message: `Click-to-call initiated from ${window.location.pathname}`,
+          notes: `Click-to-call initiated from ${window.location.pathname}`,
           pageUrl: window.location.href,
           type: 'Phone Call Click',
           status: 'new'
         };
         console.log('[Call Capture] Saving phone call click event via edge function:', callLead);
-        window.USA_SUPABASE.saveLead(callLead).catch(err => {
+        window.ICH_SUPABASE.saveLead(callLead).catch(err => {
           console.warn('[Call Capture Error]:', err.message);
         });
       });
