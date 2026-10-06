@@ -1,5 +1,5 @@
 /**
- * USA Insulation Admin Dashboard Core Application Engine
+ * Insulation contractor houston Admin Dashboard Core Application Engine
  */
 
 (function () {
@@ -38,7 +38,7 @@
       if (raw) {
         saved = JSON.parse(raw).filter(l => !DUMMY_IDS.has(l.id) && l.name !== 'Robert Miller' && l.name !== 'Sarah Jenkins');
       }
-    } catch (e) {}
+    } catch (e) { }
 
     State.leads = saved;
     saveLeads();
@@ -48,7 +48,9 @@
       try {
         const dbLeads = await window.USA_SUPABASE.getLeads();
         if (Array.isArray(dbLeads)) {
-          State.leads = dbLeads;
+          const dbIds = new Set(dbLeads.map(l => l.id));
+          const localOnly = saved.filter(l => !dbIds.has(l.id));
+          State.leads = [...dbLeads, ...localOnly];
           saveLeads();
           renderAll();
           console.log('[Admin] Synced with Supabase database:', dbLeads.length, 'leads');
@@ -230,7 +232,7 @@
         if (service) {
           State.currentServiceFilter = service;
           if (DOM.serviceFilter) DOM.serviceFilter.value = service;
-          switchView('leads');
+          switchView('leads', { keepServiceFilter: true });
           renderLeadsTable();
           showToast(`Filtered leads by ${service}`);
         }
@@ -269,17 +271,6 @@
     const proceedBtn = document.getElementById('confirm-modal-proceed');
     const cancelBtn = document.getElementById('confirm-modal-cancel');
     const closeBtn = document.getElementById('confirm-modal-close');
-
-    if (proceedBtn) {
-      proceedBtn.addEventListener('click', async () => {
-        if (typeof confirmCallback === 'function') {
-          const cb = confirmCallback;
-          await cb();
-        } else {
-          closeConfirmModal();
-        }
-      });
-    }
 
     if (cancelBtn) {
       cancelBtn.addEventListener('click', closeConfirmModal);
@@ -392,7 +383,12 @@
   }
 
   // View Switcher
-  function switchView(viewId) {
+  function switchView(viewId, options = {}) {
+    if (viewId !== 'leads' || !options.keepServiceFilter) {
+      State.currentServiceFilter = 'all';
+      if (DOM.serviceFilter) DOM.serviceFilter.value = 'all';
+    }
+
     DOM.navItems.forEach(item => {
       item.classList.toggle('active', item.getAttribute('data-view') === viewId);
     });
@@ -454,7 +450,7 @@
           if (avatarEl) avatarEl.textContent = user.email.slice(0, 2).toUpperCase();
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Calculate & Render Stats
@@ -560,7 +556,7 @@
         if (service) {
           State.currentServiceFilter = service;
           if (DOM.serviceFilter) DOM.serviceFilter.value = service;
-          switchView('leads');
+          switchView('leads', { keepServiceFilter: true });
           renderLeadsTable();
           showToast(`Filtered leads by ${service}`);
         }
@@ -690,6 +686,16 @@
     if (!DOM.callsTableBody) return;
     const calls = State.leads.filter(l => l.type === 'Phone Call Click');
 
+    if (calls.length === 0) {
+      DOM.callsTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
+            No phone call click events recorded yet.
+          </td>
+        </tr>`;
+      return;
+    }
+
     DOM.callsTableBody.innerHTML = calls.map(c => `
       <tr>
         <td><strong>${escapeHTML(c.id)}</strong></td>
@@ -711,7 +717,7 @@
       completed: '<span class="badge badge-completed"><span class="badge-dot"></span> Completed</span>',
       cancelled: '<span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>'
     };
-    return maps[status] || maps.new;
+    return maps[status] || `<span class="badge badge-cancelled"><span class="badge-dot"></span> ${escapeHTML(status || 'Unknown')}</span>`;
   }
 
   // Open Lead Details Drawer
@@ -721,18 +727,37 @@
 
     State.selectedLead = lead;
 
+    const cleanPhone = (lead.phone || '').replace(/[^\d+\-() ]/g, '');
     document.getElementById('drawer-lead-id').textContent = lead.id;
     document.getElementById('drawer-name').textContent = lead.name;
     document.getElementById('drawer-phone').textContent = lead.phone;
-    document.getElementById('drawer-phone-link').href = `tel:${encodeURIComponent(lead.phone)}`;
+    document.getElementById('drawer-phone-link').href = `tel:${cleanPhone}`;
     document.getElementById('drawer-email').textContent = lead.email || 'N/A';
-    document.getElementById('drawer-email-link').href = lead.email ? `mailto:${encodeURIComponent(lead.email)}` : '#';
+    document.getElementById('drawer-email-link').href = lead.email ? `mailto:${lead.email}` : '#';
     document.getElementById('drawer-zip').textContent = `${lead.zip} (${lead.city})`;
     document.getElementById('drawer-service').textContent = lead.service;
     document.getElementById('drawer-date').textContent = lead.date;
 
     const notesArea = document.getElementById('drawer-notes');
     if (notesArea) notesArea.value = lead.notes || '';
+
+    const valueInput = document.getElementById('drawer-value-input');
+    if (valueInput) {
+      valueInput.value = lead.value || '';
+      valueInput.onchange = async () => {
+        const newValue = Number(valueInput.value) || 0;
+        if (window.USA_SUPABASE && typeof window.USA_SUPABASE.updateValue === 'function') {
+          const ok = await window.USA_SUPABASE.updateValue(lead.id, newValue);
+          if (ok) {
+            lead.value = newValue;
+            saveLeads();
+            showToast(`Updated value for ${lead.id} → $${newValue}`, 'success');
+          } else {
+            showToast(`Failed to update value for ${lead.id}`, 'error');
+          }
+        }
+      };
+    }
 
     const statusSelect = document.getElementById('drawer-status-select');
     if (statusSelect) {
@@ -811,9 +836,7 @@
     State.selectedLead = null;
   }
 
-  // Custom Modal Confirmation Popup System (Replaces Browser Native Popups)
-  let confirmCallback = null;
-
+  // Custom Modal Confirmation Popup System
   function openConfirmModal(title, text, actionBtnText, onConfirm) {
     const modal = document.getElementById('modal-confirm');
     const titleEl = document.getElementById('confirm-modal-title');
@@ -822,9 +845,13 @@
 
     if (titleEl) titleEl.textContent = title;
     if (textEl) textEl.textContent = text;
-    if (proceedBtn) proceedBtn.textContent = actionBtnText || 'Delete Lead';
-
-    confirmCallback = onConfirm;
+    if (proceedBtn) {
+      proceedBtn.textContent = actionBtnText || 'Delete Lead';
+      proceedBtn.onclick = async () => {
+        if (typeof onConfirm === 'function') await onConfirm();
+        else closeConfirmModal();
+      };
+    }
 
     if (modal) modal.classList.add('active');
   }
@@ -832,7 +859,6 @@
   function closeConfirmModal() {
     const modal = document.getElementById('modal-confirm');
     if (modal) modal.classList.remove('active');
-    confirmCallback = null;
   }
 
   // Delete Lead using Custom Modal
@@ -904,8 +930,8 @@
       }
     } else if (range === '30d') {
       for (let i = 5; i >= 0; i--) {
-        const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 5));
-        const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 5));
+        const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 5) + 1);
+        const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 5) + 1);
 
         const count = State.leads.filter(l => {
           const d = new Date(l.submitted_at || l.date);
@@ -920,8 +946,8 @@
       }
     } else if (range === '90d') {
       for (let i = 11; i >= 0; i--) {
-        const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7));
-        const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 7));
+        const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7) + 1);
+        const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 7) + 1);
 
         const count = State.leads.filter(l => {
           const d = new Date(l.submitted_at || l.date);
@@ -1033,11 +1059,11 @@
         if (tooltipEl) {
           tooltipEl.style.display = 'block';
           tooltipEl.innerHTML = `<strong>${pt.date} (${pt.day})</strong>: ${pt.count} Leads`;
-          
+
           const rect = chartEl.getBoundingClientRect();
           const leftPercent = (pt.x / width) * 100;
           const topPercent = (pt.y / height) * 100;
-          
+
           tooltipEl.style.left = `${leftPercent}%`;
           tooltipEl.style.top = `${topPercent - 10}%`;
         }
@@ -1057,19 +1083,40 @@
     });
   }
 
-  // Helper to sanitize CSV values against Formula Injection (=, +, -, @)
+  // Helper to sanitize CSV values against spreadsheet formula injection.
   function sanitizeCSV(val) {
     let str = String(val === null || val === undefined ? '' : val);
-    if (/^[=\+\-@\t\r]/.test(str)) {
+
+    // Remove leading control/whitespace characters before checking
+    // for spreadsheet formula-triggering characters.
+    const normalized = str.replace(/^[\s\u0000-\u001F\u007F]+/, '');
+
+    if (/^[=+\-@]/.test(normalized)) {
       str = "'" + str;
     }
+
+    // Escape double quotes according to CSV rules.
     str = str.replace(/"/g, '""');
+
     return `"${str}"`;
   }
 
-  // Export to CSV with Formula Injection Security
+  // Export to CSV using Blob instead of a data URI.
   function exportToCSV() {
-    const headers = ['ID', 'Name', 'Phone', 'Email', 'ZIP', 'City', 'Service', 'Type', 'Status', 'Date', 'Value'];
+    const headers = [
+      'ID',
+      'Name',
+      'Phone',
+      'Email',
+      'ZIP',
+      'City',
+      'Service',
+      'Type',
+      'Status',
+      'Date',
+      'Value'
+    ];
+
     const rows = State.leads.map(l => [
       sanitizeCSV(l.id),
       sanitizeCSV(l.name),
@@ -1084,14 +1131,29 @@
       sanitizeCSV(l.value || 0)
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent =
+      '\uFEFF' +
+      [headers.join(','), ...rows.map(row => row.join(','))].join('\r\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8'
+    });
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `USA_Insulation_Leads_${new Date().toISOString().substring(0, 10)}.csv`);
+
+    link.href = url;
+    link.download = `USA_Insulation_Leads_${new Date()
+      .toISOString()
+      .substring(0, 10)}.csv`;
+
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
+
+    // Release the temporary object URL after the download has been initiated.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+
     showToast('Leads exported to CSV file successfully!');
   }
 

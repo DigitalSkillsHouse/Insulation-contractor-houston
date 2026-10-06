@@ -809,3 +809,8 @@
   .section-img-split.reverse .section-img-wrap { order: 0; }
 }
 
+/* ─── Hero Text Color Safety Overrides ────────────────────────── */
+.hero-copy ul, .hero-copy li { color: rgba(255, 255, 255, 0.92); }
+.hero-copy ul strong, .hero-copy li strong { color: #ffffff; }
+
+

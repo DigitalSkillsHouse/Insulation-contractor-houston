@@ -1,0 +1,494 @@
+============================================================
+TYPOGRAPHY AUDIT REPORT
+============================================================
+
+PROJECT: insulation contractor houston
+AUDIT DATE: October 6, 2026
+AUDIT SCOPE: insulation contractor houston (HTML files, assets/global.css, admin/admin.css)
+
+============================================================
+1. EXECUTIVE SUMMARY
+============================================================
+
+Overall Typography Quality:
+The codebase utilizes a clean, modern sans-serif typography foundation based on Google Fonts' "Plus Jakarta Sans". The overall visual hierarchy is bold and legible, leveraging dynamic CSS clamp() fluid typography for section headings and hero headers. However, typography drift exists due to numerous inline font-size overrides scattered across individual HTML page files, as well as unused font imports in the admin stylesheet.
+
+Typography System:
+- Primary Font: "Plus Jakarta Sans" (sans-serif)
+- Fallback Stack: system-ui, -apple-system, Segoe UI, Roboto, sans-serif
+- Design System Architecture: CSS Custom Properties in :root (--font, --font-serif) and global CSS utility classes.
+- Theme System: Dark Obsidian and Light Theme system in admin dashboard using CSS custom property overrides.
+
+Responsive Typography:
+Heading sizes leverage CSS clamp() functions (vw-based fluid scaling), allowing smooth scaling between mobile and desktop viewports without abrupt breakpoint steps. Navigation typography adapts via CSS media queries at <=900px and <=560px.
+
+Accessibility Risk:
+Low to Medium. Color contrast for primary typography (--teal-900: #0d1f3c on #f8f5f0 cream background) is strong. However, micro-text instances (9.5px on brand small, 10.5px on sticky call small) fall below the 12px recommended legibility threshold.
+
+Consistency:
+Moderate. While global.css sets a standard scale, multiple HTML files (the-woodlands-tx-insulation.html, spring-tx-insulation.html, spray-foam-insulation.html, index.html) hardcode arbitrary inline font sizes (e.g. style="font-size: 1.25rem", style="font-size: 1.5rem"). Additionally, admin.css imports JetBrains Mono via Google Fonts URL but never references it in any CSS selector.
+
+Key Findings:
+1. Unused Web Font Import: JetBrains Mono is imported in admin.css via Google Fonts URL but is never declared in any CSS rule, resulting in unnecessary network requests.
+2. Inline Typography Drift: Multiple location HTML pages override heading and table sizes via inline style attributes instead of using global CSS utility classes.
+3. Sub-12px Font Sizes: Micro-typography elements (9.5px and 10.5px) reduce legibility on high-DPI and mobile screens.
+
+============================================================
+2. FONT SYSTEM
+============================================================
+
+Primary Font: Plus Jakarta Sans
+Fallback Font: system-ui, -apple-system, Segoe UI, Roboto, sans-serif
+Secondary Fonts:
+- Georgia, serif (Used exclusively for quote marks in global.css line 327)
+- JetBrains Mono (Imported in admin.css line 2 via Google Fonts URL, but UNUSED in CSS)
+
+Font Sources:
+- Google Fonts CDN (<link rel="preload/stylesheet"> in root HTML files):
+  https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap
+- Google Fonts CDN (@import in admin/admin.css line 2):
+  https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap
+
+Font Weights:
+- 400 (Regular) — Body paragraphs, inputs, accordion b icon
+- 500 (Medium) — Lead paragraphs (.lead), review blockquotes
+- 600 (Semibold) — Navigation links, input labels, social labels, card badges
+- 700 (Bold) — Buttons, text links, eyebrows, section titles, card categories, step item headers
+- 800 (Extra Bold) — Headings (H1-H5 base), brand logo mark, proof numbers, stamps, stat values
+
+============================================================
+3. TYPOGRAPHY SCALE
+============================================================
+
+Element              Desktop       Tablet       Mobile       Unit        Source
+--------------------------------------------------------------------------------------------
+H1 (Global Hero)     57.6px        Fluid        38.4px       clamp/rem   assets/global.css:151
+H1 (Location Hero)   48px          Fluid        32px         clamp/rem   assets/global.css:384
+H1 (Admin Header)    20px          20px         20px         px          admin/admin.css:347
+H2 (Section Main)    40px          Fluid        30.4px       clamp/rem   assets/global.css:57
+H2 (Section Copy)    38.4px        Fluid        28.8px       clamp/rem   assets/global.css:108
+H2 (CTA Inner)       35.2px        Fluid        27.2px       clamp/rem   assets/global.css:312
+H2 (Emergency Card)  41.6px        Fluid        30.4px       clamp/rem   assets/global.css:262
+H2 (Signs Card)      32px          Fluid        25.6px       clamp/rem   assets/global.css:294
+H2 (Request Card)    20px          20px         20px         px          assets/global.css:166
+H3 (Price Cards)     30px          30px         30px         px          assets/global.css:205
+H3 (City Service)    22px          22px         22px         px          assets/global.css:287
+H3 (Service Overlay) 20px          20px         20px         px          assets/global.css:127
+H3 (Step Item/Prose) 18px          18px         18px         px          assets/global.css:730,791
+H3 (Benefit/Index)   17px          17px         17px         px          assets/global.css:192,277
+H3 (Landmark Line)   16px          16px         16px         px          assets/global.css:305
+H3 (Footer Main)     15px          15px         15px         px          assets/global.css:346
+H4 (Admin User)      12px          12px         12px         px          admin/admin.css:295
+H4 (Global Base)     UNVERIFIED    UNVERIFIED   UNVERIFIED   px          Inherits base h1-h5 font-weight: 800
+H5                   UNVERIFIED    UNVERIFIED   UNVERIFIED   px          Inherits base h1-h5 font-weight: 800
+H6                   UNVERIFIED    UNVERIFIED   UNVERIFIED   px          No CSS declaration found
+Paragraph (Lead)     18px          18px         18px         px          assets/global.css:107
+Paragraph (Standard) 16px          16px         16px         px          assets/global.css:24
+Paragraph (Section)  15.5px        15.5px       15.5px       px          assets/global.css:58
+Paragraph (Body/Card)13.5px-15px   13.5px-15px  13.5px-15px  px          assets/global.css:179,193
+Small Text (Brand)   9.5px         9.5px        9.5px        px          assets/global.css:67
+Small Text (Sticky)  10.5px        10.5px       10.5px       px          assets/global.css:372
+Small Text (Badge)   11px          11px         11px         px          assets/global.css:165,187
+Small Text (Sub)     12px-12.5px   12px-12.5px  12px-12.5px  px          assets/global.css:50,60,117
+Button (Primary)     15px          15px         15px         px          assets/global.css:43
+Button (Nav Call)    13px          13px         13px         px          assets/global.css:80
+Button (Newsletter)  14px          14px         14px         px          assets/global.css:331
+Button (Admin)       13px          13px         13px         px          admin/admin.css:400
+Input (Request/Form) 13.5px        13.5px       13.5px       px          assets/global.css:170
+Input (Newsletter)   14px          14px         14px         px          assets/global.css:330
+Input (Admin)        13px          13px         13px         px          admin/admin.css:372,855
+Label (Form/Span)    12px          12px         12px         px          assets/global.css:168
+Label (Admin Nav/Title) 11px       11px         11px         px          admin/admin.css:173,766
+Navigation (Desktop) 14.5px        N/A          N/A          px          assets/global.css:70
+Navigation (Dropdown)13.5px        14.5px       14.5px       px          assets/global.css:75,605
+Navigation (Mobile)  N/A           16px         16px         px          assets/global.css:537
+Hero Heading         57.6px        Fluid        38.4px       clamp/rem   assets/global.css:151
+Hero Subtitle        16.5px        16.5px       16.5px       px          assets/global.css:152
+
+============================================================
+4. HEADING HIERARCHY
+============================================================
+
+H1: clamp(2.4rem, 5.4vw, 3.6rem) [38.4px to 57.6px] on primary pages; clamp(2rem, 4.4vw, 3rem) [32px to 48px] on location pages; 20px on admin dashboard.
+H2: clamp(1.9rem, 4vw, 2.5rem) [30.4px to 40px] for major section titles; scaled down to 22.4px - 29.6px in banners; 20px on request cards; 24px (1.5rem) via inline style in spring-tx-insulation.html.
+H3: 30px on price cards; 22px on city service rows; 20px on service overlays; 18px on step items; 17px on benefit/service cards; 16px on landmark cards; 15px in footer headers; 20px (1.25rem) or 24px (1.5rem) via inline HTML overrides.
+H4: 12px on admin user card title; no explicit px size assigned in global CSS (inherits font-weight: 800 and base line-height: 1.12).
+H5: No explicit px size assigned in global CSS (inherits font-weight: 800 and base line-height: 1.12).
+H6: UNVERIFIED (no CSS rules defined).
+
+Hierarchy Assessment:
+The heading visual scale is generally logical, decreasing clearly from H1 (38.4px-57.6px) to H2 (30.4px-40px). However, two hierarchy anomalies exist:
+1. H3 in Price Cards (.price-cards h3) is styled at 30px, which is larger than some H2 variants (e.g. .special-inner h2 at max 29.6px and .signs-card h2 at min 25.6px).
+2. Inline HTML overrides in location pages reset H2 and H3 sizes to arbitrary fixed rem values (1.25rem, 1.5rem), breaking the fluid responsive clamp hierarchy established in global.css.
+
+============================================================
+5. BODY & PARAGRAPH TYPOGRAPHY
+============================================================
+
+Body Font: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif
+Body Size: 16px (1rem browser default)
+Paragraph Size: 13.5px, 14px, 14.5px, 15px, 15.5px, 16.5px (.hero-copy > p), 18px (.lead)
+Line Height: 1.6 (body default), 1.65 (.prose-col p, .step-item p), 1.7 (.faq-stack p, .section-heading.heading-split p), 1.5 (.city-note p)
+Letter Spacing: -0.015em on headings; normal (0em) on paragraphs; 0.14em on eyebrows
+Weight: 400 (Regular body text), 500 (Medium lead text & quotes)
+
+Assessment:
+Body typography maintains high visual readability with strong contrast against light cream (#f8f5f0) and white card backgrounds. The base line-height of 1.6 provides comfortable leading for multi-line body text. However, paragraph font sizing suffers from scale fragmentation, exhibiting 7 different font size variations (13.5px, 14px, 14.5px, 15px, 15.5px, 16.5px, 18px) across different section components.
+
+============================================================
+6. COMPONENT TYPOGRAPHY
+============================================================
+
+Header:
+- Utility Bar: 12.5px (color: rgba(255,255,255,0.82))
+- Utility Social Label: 12px, font-weight: 600, letter-spacing: 0.03em
+- Brand Logo Text: 17px, font-weight: 800, line-height: 1.1
+- Brand Logo Subtitle: 9.5px, font-weight: 700, letter-spacing: 0.16em
+
+Navigation:
+- Desktop Main Links: 14.5px, font-weight: 600
+- Desktop Dropdown Links: 13.5px, font-weight: 600
+- Mobile Menu Links: 16px, font-weight: 600
+- Mobile Dropdown Links: 14.5px
+- Phone CTA Button: 13px, font-weight: 800, letter-spacing: 0.07em, uppercase
+
+Hero:
+- Main H1 Heading: clamp(2.4rem, 5.4vw, 3.6rem), font-weight: 800, letter-spacing: -0.02em
+- Subtitle Paragraph: 16.5px, color: rgba(255,255,255,0.72)
+- Proof Metrics Numbers: 30px, font-weight: 800
+- Proof Labels: 12px
+
+Buttons:
+- Primary / Light Button: 15px, font-weight: 700
+- Text Link: 14px, font-weight: 700
+- Sticky Call Button: 15px strong / 10.5px small
+- Newsletter Button: 14px, font-weight: 700
+- Admin Button: 13px, font-weight: 700
+
+Cards:
+- Service Card Title: 17px, font-weight: 800
+- Service Card Description: 13.5px
+- Benefit Card H3: 17px
+- Benefit Card Number: 12px, font-weight: 800, letter-spacing: 0.08em
+- Price Card H3: 30px, font-weight: 800
+- Price Card List Items: 13px
+- Price Card Category Label: 11px, font-weight: 700, uppercase, letter-spacing: 0.06em
+
+Forms:
+- Form Labels: 12px, font-weight: 600, color: var(--teal-900)
+- Form Inputs / Selects / Textareas: 13.5px (global) / 13px (admin)
+- Form Note: 11.5px
+- Form Success Banner: 13px, font-weight: 600
+
+Footer:
+- Section Headers: 15px, font-weight: 800
+- Navigation & Address Links: 14px
+- Footer Phone Number: 20px, font-weight: 800
+- Bottom Legal Text & Links: 13px
+
+Blog / Content (City Story):
+- Story Body Paragraphs: 15px
+- Drop Cap First Letter: 3.4rem (54.4px), font-weight: 800, line-height: 0.8
+- Quote Note Paragraph: 17px, font-style: italic, line-height: 1.5
+
+CTA:
+- CTA Section Heading: clamp(1.7rem, 3.2vw, 2.2rem)
+- CTA Paragraph: 15px
+
+============================================================
+7. RESPONSIVE TYPOGRAPHY
+============================================================
+
+375px (Mobile):
+- H1 scales via clamp to 38.4px (Global Hero) or 32px (Location Hero).
+- H2 scales via clamp to 30.4px (Section Heading), 28.8px (Section Copy), 27.2px (CTA).
+- Navigation links scale up to 16px inside full-screen mobile slide-down drawer for touch accessibility.
+- Brand logo text scales down to 13px at <=560px breakpoint.
+- Sticky call button collapses to a 54px icon-only circle at <=768px breakpoint, hiding the text label.
+
+768px (Tablet):
+- Fluid typography scales smoothly using viewport width (vw) parameters inside clamp().
+- Grid columns collapse to single column layout at 820px/900px breakpoints.
+
+1440px (Desktop):
+- Headings reach max clamp limits (H1 = 57.6px, H2 = 40px).
+- Navigation renders full horizontal menu bar with 14.5px links and 13.5px dropdown panels.
+
+Responsive Problems:
+- Inline HTML font size overrides (e.g. style="font-size: 1.25rem") do not scale fluidly with viewport width, creating static font sizing on mobile screens for affected sections.
+
+============================================================
+8. LINE HEIGHT
+============================================================
+
+Element              Font Size       Line Height       Ratio
+--------------------------------------------------------------------------------------------
+H1 (Hero)            38.4px-57.6px   1.12              1.12
+H2 (Section)         30.4px-40px     1.12              1.12
+H3 (Cards/Index)     17px-30px       1.12              1.12
+Request Card Title   20px            1.2               1.20
+Body Paragraph       16px            1.6               1.60
+Section Paragraph    15.5px          1.6               1.60
+Prose / Step Text    14.5px          1.65              1.65
+FAQ Stack Paragraph  14.5px          1.7               1.70
+City Note Quote      17px            1.5               1.50
+Drop Cap Letter      54.4px          0.8               0.80
+
+============================================================
+9. FONT WEIGHTS
+============================================================
+
+Weight: 400 (Regular)
+Usage: Default body text, form inputs, accordion toggle b icon.
+Assessment: Clean, legible rendering for long-form reading.
+
+Weight: 500 (Medium)
+Usage: Section lead paragraphs (.lead), review blockquotes.
+Assessment: Provides subtle visual emphasis without cluttering hierarchy.
+
+Weight: 600 (Semibold)
+Usage: Main navigation links, dropdown items, form input labels, social labels, card badges.
+Assessment: Standard weight for interactive elements and form fields.
+
+Weight: 700 (Bold)
+Usage: Buttons, text links, eyebrows, section titles, category tags, verified badges.
+Assessment: Strong emphasis for actionable and highlighted UI components.
+
+Weight: 800 (Extra Bold)
+Usage: All headings (H1-H5 base), brand logo mark, brand title, hero metrics numbers, experience stamp numbers, drop cap first letter.
+Assessment: Dominant header style establishing high-contrast section separation.
+
+============================================================
+10. LETTER SPACING
+============================================================
+
+Element              Value           Unit       Context / Reason
+--------------------------------------------------------------------------------------------
+Headings (H1-H5)     -0.015em        em         Tighten heading display rendering
+Hero H1 Heading      -0.02em         em         Tighter spacing on large hero title
+Eyebrows (.eyebrow)  0.14em          em         Uppercase tracking for category tags
+Nav Call Button      0.07em          em         Uppercase tracking for header CTA
+Brand Small Text     0.16em          em         Uppercase tracking for logo tagline
+Benefit Number       0.08em          em         Uppercase tracking for step numbers
+Request Small Text   0.08em          em         Uppercase tracking for form pre-title
+Service Overlay Span 0.06em          em         Uppercase tracking for overlay badges
+Process Card Small   0.14em          em         Uppercase tracking for process labels
+Brand Strip Span     0.08em          em         Uppercase tracking for brand partners
+Admin Header H1      -0.4px          px         Tighten dashboard main title
+Admin Nav Section    1px             px         Uppercase tracking for sidebar titles
+Admin Table Header   0.8px           px         Uppercase tracking for table headers
+Admin Stat Value     -0.6px          px         Tighten large metric numbers
+
+============================================================
+11. TEXT TRANSFORMATION
+============================================================
+
+Uppercase:
+- .eyebrow
+- .nav-call
+- .request-heading small
+- .service-overlay span
+- .price-cards article > div small
+- .process-card small
+- .local-price-cards article > span
+- .landmark-line small
+- .nav-section-title (admin/admin.css)
+- .lead-table th (admin/admin.css)
+- .drawer-label (admin/admin.css)
+
+Lowercase:
+- None explicitly declared in CSS.
+
+Capitalize:
+- None explicitly declared in CSS.
+
+None:
+- Default for all other elements.
+
+============================================================
+12. TYPOGRAPHY CONSISTENCY
+============================================================
+
+Typography System Coherence:
+The global CSS establishes a consistent design system centered around Plus Jakarta Sans and clamp() fluid typography. However, inconsistencies exist in three specific areas:
+
+1. Micro-scale Paragraph Drift:
+The codebase uses 7 closely related paragraph font sizes across different sections:
+- 13.5px (.svc-desc, .problem-list p, .special-inner > p)
+- 14px (.accordion-panel p, .footer-main p)
+- 14.5px (.check-list li, .step-item p, .prose-col p, .location-section-heading p)
+- 15px (.pricing-intro > p, .city-story p, .cta-inner p)
+- 15.5px (.section-heading p, .service-list a strong, .accordion button strong)
+- 16.5px (.hero-copy > p)
+- 18px (.section-copy .lead)
+
+2. Inline Style Overrides in Page Files:
+Individual HTML page files override CSS rules with hardcoded style attributes:
+- the-woodlands-tx-insulation.html: lines 197, 201, 213, 217, 297, 319, 323, 327, 331, 358, 360, 390 (style="font-size: 1.25rem", style="font-size: 1.5rem", style="font-size: 0.95rem")
+- spring-tx-insulation.html: lines 318, 388, 458, 463, 468 (style="font-size: 1.5rem; font-size: 0.95rem")
+- spray-foam-insulation.html: lines 303, 334, 428, 429, 432, 436, 440 (style="font-size: 1.1rem; font-size: 0.9rem")
+- index.html: lines 409, 410, 421, 422, 430, 431, 450, 480, 482, 538, 564, 567, 600, 601, 605, 606, 623 (inline style font-size declarations)
+
+3. Variable Naming Misnomer:
+In assets/global.css line 22:
+  --font-serif: "Plus Jakarta Sans", system-ui, sans-serif;
+The variable --font-serif is assigned a sans-serif font stack.
+
+============================================================
+13. ACCESSIBILITY
+============================================================
+
+- Minimum Readable Text Size:
+  Elements with sub-12px text sizes violate the recommended 12px minimum for web readability:
+  * brand small (9.5px in assets/global.css:67)
+  * sticky-call small (10.5px in assets/global.css:372)
+  * sidebar-badge (10px in admin/admin.css:153)
+  * nav-counter (11px in admin/admin.css:233)
+  * prose-faq-label (11px in assets/global.css:748)
+
+- Color Contrast:
+  * Body text (--ink: #2b2d42) on body background (--cream: #f8f5f0) provides a high contrast ratio of ~11.8:1 (exceeds WCAG AAA requirement of 7:1).
+  * Dark cards (--teal-900: #0d1f3c) with white text (#ffffff) provide a contrast ratio of ~15.9:1.
+  * Muted text (--muted: #6c757d) on small 11px/12px labels should be audited on custom backgrounds.
+
+- Focus & Interactive States:
+  Buttons and links include focus outline/border-color updates (e.g. input:focus { border-color: var(--accent); }).
+
+- Zoom & Text Scaling:
+  Because base font sizes rely on px and rem units, standard browser zoom (100% to 200%) scales typography predictably.
+
+============================================================
+14. SEMANTIC HEADING STRUCTURE
+============================================================
+
+Semantic Heading Hierarchy Audit:
+- All main pages correctly feature a single <h1> element inside the hero section (.hero-copy h1 or .location-hero-copy h1).
+- Main page sections use <h2> elements for primary titles (.section-heading h2, .section-copy h2).
+- Cards and sub-components use <h3> elements (.svc-card strong, .service-overlay h3, .benefit-grid h3).
+
+Semantic Deviations & Issues Identified:
+1. Division-based Headings:
+   In assets/global.css line 166, .request-heading .request-title is styled as a 20px heading alongside h2. On pages where a <div> or <span> is used with class .request-title instead of an <h2>, screen readers will not register the heading level.
+2. Inconsistent FAQ Heading Elements:
+   Global FAQ sections use <button><strong>...</strong></button> inside <article> for accordion questions, while spring-tx-insulation.html lines 458-468 uses <h2> style="font-size: 1.5rem;" for FAQ questions.
+3. Card Component Tagging:
+   In assets/global.css line 119, .svc-card strong is used as the primary card title (styled as 17px bold header) rather than an <h3> element, omitting it from the document outline.
+
+============================================================
+15. FINDINGS
+============================================================
+
+[HIGH]
+ID: TYPO-01
+Title: Unused Web Font Import in Admin Stylesheet
+File: admin/admin.css
+Line: 2
+Component: Admin Theme (@import)
+Code:
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+Problem:
+  JetBrains Mono is requested and downloaded from Google Fonts, but is never referenced in any font-family declaration in admin.css or admin/index.html.
+Impact:
+  Wastes bandwidth and delays CSS object model construction.
+Recommendation:
+  Remove JetBrains Mono from the Google Fonts import URL in admin.css.
+
+[HIGH]
+ID: TYPO-02
+Title: Inline Typography Overrides Bypassing Design System
+File: the-woodlands-tx-insulation.html, spring-tx-insulation.html, spray-foam-insulation.html, index.html
+Line: Various (e.g., the-woodlands-tx-insulation.html:197, spring-tx-insulation.html:458)
+Component: Location Page Content
+Code:
+  <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Rising Energy Bills</h3>
+  <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Does Attic Insulation Help Reduce Energy Bills?</h2>
+Problem:
+  Inline style attributes hardcode font-size in rem/px, overriding global CSS clamp() fluid scales and preventing responsive typography adjustments.
+Impact:
+  Creates typography drift and inconsistent heading scaling across location pages.
+Recommendation:
+  Remove inline style="font-size: ..." attributes and replace with standard CSS classes.
+
+[MEDIUM]
+ID: TYPO-03
+Title: Misnamed Font Family Variable --font-serif
+File: assets/global.css
+Line: 22
+Component: Design Tokens (:root)
+Code:
+  --font-serif: "Plus Jakarta Sans", system-ui, sans-serif;
+Problem:
+  The custom property --font-serif specifies sans-serif fonts instead of a serif font stack.
+Impact:
+  Causes confusion for developers expecting serif typography when invoking var(--font-serif).
+Recommendation:
+  Update --font-serif to a true serif stack (e.g. "Georgia", serif) or rename the variable.
+
+[MEDIUM]
+ID: TYPO-04
+Title: Sub-12px Micro-Typography Below Accessibility Guidelines
+File: assets/global.css, admin/admin.css
+Line: assets/global.css:67,372; admin/admin.css:153,233
+Component: Brand Subtitle, Sticky Call Button Small, Sidebar Badge, Nav Counter
+Code:
+  .brand small { font-size: 9.5px; }
+  .sticky-call small { font-size: 10.5px; }
+  .sidebar-badge { font-size: 10px; }
+Problem:
+  Font sizes below 12px impair legibility for visually impaired users and high-DPI mobile screens.
+Impact:
+  Violates minimum text sizing accessibility best practices.
+Recommendation:
+  Increase minimum font sizes to at least 12px.
+
+[LOW]
+ID: TYPO-05
+Title: Paragraph Font Size Scale Fragmentation
+File: assets/global.css
+Line: Various
+Component: Body & Component Paragraphs
+Code:
+  Font sizes: 13.5px, 14px, 14.5px, 15px, 15.5px, 16.5px, 18px
+Problem:
+  Seven different body/paragraph font sizes are declared across components without following a strict modular scale.
+Impact:
+  Minor visual inconsistency across different sections.
+Recommendation:
+  Consolidate paragraph font sizes into a 3-step scale (Small: 13px, Body: 15px, Lead: 18px).
+
+============================================================
+16. TYPOGRAPHY TOKEN / DESIGN SYSTEM SUMMARY
+============================================================
+
+Recommended logical scale based on the existing implementation:
+
+H1: clamp(2.4rem, 5.4vw, 3.6rem) [38.4px - 57.6px] | Weight: 800 | Line-Height: 1.12
+H2: clamp(1.8rem, 3.6vw, 2.4rem) [28.8px - 38.4px] | Weight: 800 | Line-Height: 1.12
+H3: 20px (1.25rem)                                 | Weight: 800 | Line-Height: 1.20
+H4: 18px (1.125rem)                                | Weight: 700 | Line-Height: 1.25
+H5: 16px (1rem)                                    | Weight: 700 | Line-Height: 1.30
+H6: 14px (0.875rem)                                | Weight: 700 | Line-Height: 1.35
+Body (Base): 15px                                  | Weight: 400 | Line-Height: 1.60
+Small: 12.5px                                      | Weight: 600 | Line-Height: 1.40
+Button: 15px                                       | Weight: 700 | Line-Height: 1.00
+
+NOTE:
+Recommendations must be clearly separated from the CURRENT IMPLEMENTATION.
+Never present recommendations as if they are already implemented.
+
+============================================================
+17. FINAL VERDICT
+============================================================
+
+Typography Quality: Good (8/10)
+Consistency: Moderate (6.5/10)
+Readability: High (8.5/10)
+Responsive Quality: Excellent (9/10 - global clamp fluid typography)
+Accessibility Risk: Low to Medium (7/10 - strong contrast, sub-12px microtext issue)
+
+Overall Assessment:
+The codebase features a modern, high-contrast typography system anchored by Plus Jakarta Sans and viewport-based fluid scaling (clamp). The visual presentation on desktop and mobile is clean and readable. To achieve full production perfection, the engineering team should eliminate unused web font downloads in admin.css, sanitize inline style font-size overrides on location HTML files, adjust sub-12px micro-text elements to at least 12px, and harmonize paragraph font sizes into a simplified modular scale.
+
+============================================================
+END OF REPORT
+============================================================

@@ -159,97 +159,81 @@ function initReveal() {
   els.forEach(function (el) { io.observe(el); });
 }
 
-/* Lead capture for NATIONWIDE / SUBDOMAIN pages (data-t8-form).
-   Static city/state exports carry `data-rl-lead` and are wired by the shared
-   export-time injector — that injector does NOT run for the dynamic nationwide
-   renderer, so those pages ship this self-contained handler instead (mirrors
-   theme-8's nationwide behaviour). Config, when present, arrives via
-   `window.__RL_LEADS`; without it the form still shows the success state. */
-function leadsConfig() {
-  var c = window.__RL_LEADS || {};
-  var base = String(c.apiBase || "");
-  var siteId = String(c.siteId || "");
-  if (!/^https?:\/\//.test(base)) return null; // apiBase not set
-  if (!siteId || siteId.indexOf("{{") !== -1) return null; // siteId not baked
-  var key = String(c.turnstileSiteKey || "");
-  if (!key || key.indexOf("{{") !== -1) key = ""; // widget disabled if unset
-  return { apiBase: base.replace(/\/+$/, ""), siteId: siteId, turnstileSiteKey: key };
-}
-
-var _tsState = { loading: false, loaded: false, queue: [] };
-function loadTurnstile(cb) {
-  if (_tsState.loaded && window.turnstile) return cb();
-  _tsState.queue.push(cb);
-  if (_tsState.loading) return;
-  _tsState.loading = true;
-  window.__rlTurnstileReady = function () {
-    _tsState.loaded = true;
-    _tsState.queue.forEach(function (f) { f(); });
-    _tsState.queue = [];
-  };
-  var s = document.createElement("script");
-  s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__rlTurnstileReady&render=explicit";
-  s.async = true;
-  s.defer = true;
-  document.head.appendChild(s);
-}
-function mountTurnstile(form, siteKey) {
-  if (!siteKey || form.__rlTs) return;
-  form.__rlTs = true;
-  var box = document.createElement("div");
-  box.className = "rl-turnstile";
-  var submit = form.querySelector('button[type="submit"]');
-  if (submit && submit.parentNode) submit.parentNode.insertBefore(box, submit);
-  else form.appendChild(box);
-  loadTurnstile(function () {
-    if (window.turnstile) window.turnstile.render(box, { sitekey: siteKey });
-  });
-}
 function initLeadForms() {
-  var cfg = leadsConfig();
-  document.querySelectorAll("form[data-t8-form]").forEach((form) => {
-    if (cfg && cfg.turnstileSiteKey) {
-      form.addEventListener("focusin", function () { mountTurnstile(form, cfg.turnstileSiteKey); }, { once: true });
-    }
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
+  document.querySelectorAll('form[data-rl-lead], form.contact-form, form.request-card').forEach(form => {
+    if (form.__leadHandlerBound) return; // guard against double-registration
+    form.__leadHandlerBound = true;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // CRITICAL — stop page reload
+
       const submit = form.querySelector('button[type="submit"]');
+      const success = form.querySelector('.form-success');
       const hp = form.querySelector('[name="_hp"]');
-      const isBot = hp && hp.value;
-      if (cfg && !isBot) {
-        const data = {};
-        new FormData(form).forEach((value, key) => {
-          if (key === "_hp") return;
-          data[key] = typeof value === "string" ? value : String(value);
-        });
-        data.pageUrl = window.location.href;
-        const tokenInput = form.querySelector('[name="cf-turnstile-response"]');
-        if (tokenInput && tokenInput.value) data.turnstileToken = tokenInput.value;
-        try {
-          fetch(cfg.apiBase + "/api/leads/" + encodeURIComponent(cfg.siteId), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-            keepalive: true,
-          }).catch(() => {});
-        } catch (_e) { /* ignore — still show success below */ }
+
+      // Honeypot — silently succeed for bots
+      if (hp && hp.value) {
+        if (success) success.classList.add('visible');
+        return;
       }
-      form.querySelector(".form-success")?.classList.add("visible");
+
+      const get = name => (form.querySelector(`[name="${name}"]`)?.value || '').trim();
+
+      const leadData = {
+        name:    get('name'),
+        phone:   get('phone'),
+        email:   get('email'),
+        zip:     get('zip'),
+        service: get('service') || 'Attic Insulation',
+        message: get('message'),
+        pageUrl: window.location.href,
+        type:    'Form Submission',
+        _hp:     hp ? hp.value : ''
+      };
+
+      if (!leadData.name && !leadData.phone) return; // nothing to submit
+
+      // Disable button + show loading
       if (submit) {
         submit.disabled = true;
-        submit.innerHTML = "Request received <span>✓</span>";
+        submit.dataset.origText = submit.innerHTML;
+        submit.innerHTML = 'Sending… <span>⏳</span>';
+      }
+
+      try {
+        if (window.USA_SUPABASE && typeof window.USA_SUPABASE.saveLead === 'function') {
+          await window.USA_SUPABASE.saveLead(leadData);
+        }
+        // Show success state
+        if (success) success.classList.add('visible');
+        if (submit) {
+          submit.innerHTML = 'Request received <span>✓</span>';
+        }
+      } catch (err) {
+        if (submit) {
+          submit.disabled = false;
+          submit.innerHTML = submit.dataset.origText || 'Request Free Quote →';
+        }
+        const errDiv = form.querySelector('.form-error') || (() => {
+          const d = document.createElement('p');
+          d.className = 'form-error';
+          d.style.cssText = 'color:#ef4444;font-size:13px;margin-top:8px;';
+          form.appendChild(d);
+          return d;
+        })();
+        errDiv.textContent = 'Something went wrong — please call us directly at +1 409-996-4620.';
       }
     });
   });
 }
 
-/* Newsletter is a presentational-only sign-up (not a lead form). */
+/* Newsletter is a presentational-only sign-up */
 function initNewsletter() {
   document.getElementById("newsletter-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const button = event.currentTarget.querySelector("button");
     if (button) {
-      button.textContent = "You're on the list ✓";
+      button.textContent = "Thanks! We'll keep you posted.";
       button.disabled = true;
     }
   });

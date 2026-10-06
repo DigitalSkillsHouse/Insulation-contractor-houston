@@ -1,3 +1,6 @@
+[functions]
+  directory = "api"
+
 [build.processing.html]
 pretty_urls = true
 
