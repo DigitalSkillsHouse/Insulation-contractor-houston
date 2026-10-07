@@ -957,6 +957,26 @@ body {
   transform: scale(1);
 }
 
+.modal-header {
+  padding: 24px 24px 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body {
+  padding: 0 24px 24px 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
 /* Mini / Compact Sidebar System (Desktop & Mobile Collapsed Mode) */
 #header-sidebar-toggle {
   display: inline-flex;
