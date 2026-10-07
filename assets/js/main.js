@@ -1,9 +1,5 @@
-/* THEME 9 — "Warm Community" front-end behaviours. Sections are inlined at
-   generation time, so there is no client-side component loading.
-
-   Lead capture is NOT handled here: theme-9 forms carry `data-rl-lead` and the
-   shared central injector adds the config, capture JS, honeypot and Turnstile
-   at export time. This file only powers the presentational behaviours. */
+/* THEME 9 — "Warm Community" front-end behaviours.
+   Lead capture and form persistence handled via Supabase API backend. */
 
 function initNavbar() {
   const toggle = document.querySelector(".nav-toggle");
@@ -160,7 +156,7 @@ function initReveal() {
 }
 
 function initLeadForms() {
-  document.querySelectorAll('form[data-rl-lead], form.contact-form, form.request-card').forEach(form => {
+  document.querySelectorAll('form.contact-form, form.request-card').forEach(form => {
     if (form.__leadHandlerBound) return; // guard against double-registration
     form.__leadHandlerBound = true;
 

@@ -36,5 +36,4 @@ This is a professional website for Insulation Contractor Houston, specializing i
 - Contact form functionality
 - Mobile-friendly navigation
 - Dynamic service and location pages
-
-Generated with Ranklocal - Professional website creation tool.
+

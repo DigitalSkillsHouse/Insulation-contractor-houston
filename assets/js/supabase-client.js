@@ -6,8 +6,8 @@
 (function () {
   'use strict';
 
-  const SUPABASE_URL = 'https://nwafioovagseljmawgsm.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_vnHTFMDCkSJoKADIXUSz2g_VFWVNGJZ';
+  const SUPABASE_URL = 'https://obpvzwzttrzqjamaouzh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icHZ6d3p0dHJ6cWphbWFvdXpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTM1OTM0OCwiZXhwIjoyMTA2OTM1MzQ4fQ.7geqsygX_Ya2PDYIBjHkgz3yUc_vzTji_T7g-5UngqU';
   const TABLE_NAME = 'leads';
 
   let client = null;

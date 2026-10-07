@@ -200,62 +200,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="assets/global.css" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /><style>[data-sal]{opacity:1 !important;transform:none !important;}</style></noscript>
-  <!--rl-leads--><script>window.__RL_LEADS={siteId:"6ab2226d583e7924cf63939f",apiBase:"https://ranklocal.cc",turnstileSiteKey:""};</script><script>
-(function(){
-  function cfg(){
-    var c=window.__RL_LEADS||{};
-    var base=String(c.apiBase||''); var siteId=String(c.siteId||'');
-    if(base.indexOf('http')!==0) return null;
-    if(!siteId||siteId.indexOf('{{')!==-1) return null;
-    var key=String(c.turnstileSiteKey||''); if(key.indexOf('{{')!==-1) key='';
-    while(base.length&&base.charAt(base.length-1)==='/') base=base.slice(0,-1);
-    return {apiBase:base,siteId:siteId,ts:key};
-  }
-  var C=cfg(); if(!C) return;
-  var TS={loading:false,loaded:false,q:[]};
-  function loadTs(cb){
-    if(TS.loaded&&window.turnstile) return cb();
-    TS.q.push(cb); if(TS.loading) return; TS.loading=true;
-    window.__rlTsReady=function(){TS.loaded=true;TS.q.forEach(function(f){f();});TS.q=[];};
-    var s=document.createElement('script');
-    s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__rlTsReady&render=explicit';
-    s.async=true; s.defer=true; document.head.appendChild(s);
-  }
-  function mountTs(form){
-    if(!C.ts||form.__rlTs) return; form.__rlTs=true;
-    var box=document.createElement('div'); box.className='rl-turnstile'; box.style.margin='10px 0';
-    var sb=form.querySelector('button[type=submit],input[type=submit]');
-    if(sb&&sb.parentNode) sb.parentNode.insertBefore(box,sb); else form.appendChild(box);
-    loadTs(function(){ try{ window.turnstile.render(box,{sitekey:C.ts,size:'flexible'}); }catch(e){} });
-  }
-  function ensureHp(form){
-    if(form.querySelector('[name=_hp]')) return;
-    var i=document.createElement('input'); i.type='text'; i.name='_hp'; i.tabIndex=-1;
-    i.setAttribute('autocomplete','off'); i.setAttribute('aria-hidden','true');
-    i.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none';
-    form.appendChild(i);
-  }
-  function setup(){
-    var forms=document.querySelectorAll('form[data-rl-lead]');
-    for(var i=0;i<forms.length;i++){ (function(f){
-      ensureHp(f);
-      if(C.ts){ f.addEventListener('focusin',function(){mountTs(f);},{once:true}); }
-    })(forms[i]); }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setup); else setup();
-  document.addEventListener('submit',function(e){
-    var f=e.target;
-    if(!f||!f.matches||!f.matches('form[data-rl-lead]')) return;
-    var hp=f.querySelector('[name=_hp]'); if(hp&&hp.value) return;
-    var data={}; var els=f.querySelectorAll('input,textarea,select');
-    for(var i=0;i<els.length;i++){ var el=els[i]; var n=el.name;
-      if(!n||n==='_hp'||n==='cf-turnstile-response') continue; data[n]=el.value; }
-    data.pageUrl=window.location.href;
-    var tok=f.querySelector('[name=cf-turnstile-response]'); if(tok&&tok.value) data.turnstileToken=tok.value;
-    try{ fetch(C.apiBase+'/api/leads/'+encodeURIComponent(C.siteId),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),keepalive:true}).catch(function(){}); }catch(_e){}
-  },true);
-})();
-</script>
+
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -303,6 +248,7 @@
           <a href="/conroe-tx-insulation">Conroe, TX</a>
           <a href="/kingwood-tx-insulation">Kingwood, TX</a>
           <a href="/the-woodlands-tx-insulation">The Woodlands, TX</a>
+          <a href="/humble-tx-insulation">Humble, TX</a>
           </div>
         </span>
         <a href="/about">About</a>
@@ -331,7 +277,7 @@
           <a class="text-link text-link-light" href="tel:+14099964620">Need help now? Call Mon-Fri 9am-6pm</a>
         </div>
       </div>
-      <form class="request-card" id="hero-request-form" data-rl-lead data-sal="slide-left" data-sal-duration="650" data-sal-delay="120"><input type="text" name="_hp" tabindex="-1" autocomplete="off" class="rl-hp" aria-hidden="true" />
+      <form class="request-card" id="hero-request-form" data-sal="slide-left" data-sal-duration="650" data-sal-delay="120"><input type="text" name="_hp" tabindex="-1" autocomplete="off" style="display:none;" aria-hidden="true" />
         <div class="request-heading"><span class="request-icon">&#8599;</span><div><small>Free In-Home Inspection</small><span class="request-title">Get Your Free Estimate</span></div></div>
         <p>Tell us about your home wall insulation project. Our local Cypress specialists will confirm your quote shortly.</p>
         <div class="form-grid">
@@ -552,7 +498,7 @@
           <div><small>Office hours</small><strong>Mon-Fri 9am-6pm</strong></div>
         </div>
       </div>
-      <form class="contact-form" id="contact-form" data-rl-lead><input type="text" name="_hp" tabindex="-1" autocomplete="off" class="rl-hp" aria-hidden="true" />
+      <form class="contact-form" id="contact-form"><input type="text" name="_hp" tabindex="-1" autocomplete="off" style="display:none;" aria-hidden="true" />
         <label><span>Name</span><input type="text" name="name" placeholder="Your full name" required /></label>
         <label><span>Phone</span><input type="tel" name="phone" placeholder="Best number to reach you" required /></label>
         <label><span>Email</span><input type="email" name="email" placeholder="you@email.com" /></label>
@@ -580,6 +526,14 @@
         <!-- RL-AUTO:footer-services START -->
           <a href="/spray-foam-insulation">Spray Foam Insulation</a><a href="/injection-foam-insulation">Injection Foam Insulation</a><a href="/blown-in-insulation">Blown In Insulation</a>
           <!-- RL-AUTO:footer-services END -->
+      </div>
+      <div>
+        <h3>Locations</h3>
+        <a href="/spring-tx-insulation">Spring, TX</a>
+        <a href="/conroe-tx-insulation">Conroe, TX</a>
+        <a href="/kingwood-tx-insulation">Kingwood, TX</a>
+        <a href="/the-woodlands-tx-insulation">The Woodlands, TX</a>
+        <a href="/humble-tx-insulation">Humble, TX</a>
       </div>
       <div>
         <h3>Company</h3>
