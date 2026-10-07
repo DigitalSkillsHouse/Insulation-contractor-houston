@@ -15,11 +15,10 @@ export default async function handler(req) {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
-  // Resolve environment variables per request in Edge runtime
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  // Resolve environment variables per request in Edge runtime (with fallbacks)
+  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://obpvzwzttrzqjamaouzh.supabase.co';
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icHZ6d3p0dHJ6cWphbWFvdXpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTM1OTM0OCwiZXhwIjoyMTA2OTM1MzQ4fQ.7geqsygX_Ya2PDYIBjHkgz3yUc_vzTji_T7g-5UngqU';
 
-  // Fail closed if required server configuration is missing.
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     console.error('[submit-lead] Required Supabase environment variables are missing.');
     return jsonResponse({ error: 'Service temporarily unavailable' }, 503);
