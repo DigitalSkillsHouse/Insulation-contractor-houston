@@ -51,9 +51,7 @@
       try {
         const dbLeads = await sbClient.getLeads();
         if (Array.isArray(dbLeads)) {
-          const dbIds = new Set(dbLeads.map(l => l.id));
-          const localOnly = saved.filter(l => !dbIds.has(l.id));
-          State.leads = [...dbLeads, ...localOnly];
+          State.leads = dbLeads;
           saveLeads();
           renderAll();
           console.log('[Admin] Synced with Supabase database:', dbLeads.length, 'leads');
@@ -912,17 +910,10 @@
           proceedBtn.textContent = 'Deleting...';
         }
 
-        let success = false;
         try {
           const sbClient = getSupabase();
           if (sbClient && typeof sbClient.deleteLead === 'function') {
-            success = await sbClient.deleteLead(leadId);
-          } else {
-            success = true;
-          }
-
-          if (!success) {
-            throw new Error(`Supabase DB deletion failed for lead ${leadId}`);
+            await sbClient.deleteLead(leadId);
           }
 
           State.leads = State.leads.filter(l => l.id !== leadId);

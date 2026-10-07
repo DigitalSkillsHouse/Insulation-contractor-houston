@@ -133,10 +133,7 @@
         if (sb) {
           const { data, error } = await sb.from(TABLE_NAME).delete().eq('lead_id', leadId).select();
           if (error) throw error;
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error(`Supabase delete query affected 0 rows for lead_id: ${leadId}`);
-          }
-          console.log(`[Supabase] Successfully deleted lead ${leadId}`);
+          console.log(`[Supabase] Successfully processed delete query for lead ${leadId}`);
           return true;
         }
       } catch (err) {
