@@ -813,4 +813,23 @@
 .hero-copy ul, .hero-copy li { color: rgba(255, 255, 255, 0.92); }
 .hero-copy ul strong, .hero-copy li strong { color: #ffffff; }
 
-
+/* ─── Dark Section Contrast Utility ─────────────────────────── */
+.section-dark {
+  background-color: #0d1f3c !important;
+  color: #ffffff !important;
+}
+.section-dark h1,
+.section-dark h2,
+.section-dark h3,
+.section-dark h4 {
+  color: #ffffff !important;
+}
+.section-dark p {
+  color: rgba(255, 255, 255, 0.85);
+}
+.section-dark a:not(.button) {
+  color: var(--accent-bright);
+}
+.section-dark a:not(.button):hover {
+  color: #ffffff;
+}
