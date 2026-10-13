@@ -1,5 +1,31 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin/
+
+# AI crawlers — explicitly allowed for AI Overviews and answer engine indexing
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
 
 Sitemap: https://insulationcontractorhouston.com/sitemap.xml

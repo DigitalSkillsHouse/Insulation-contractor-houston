@@ -833,3 +833,6 @@
 .section-dark a:not(.button):hover {
   color: #ffffff;
 }
+.map-section{padding:48px 0 0;}
+.map-section .shell{overflow:hidden;border-radius:var(--r-card);}
+.map-section iframe{border-radius:var(--r-card);}
