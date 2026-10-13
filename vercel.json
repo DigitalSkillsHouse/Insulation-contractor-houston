@@ -43,7 +43,6 @@
     { "source": "/service-areas/", "destination": "/contact", "permanent": true },
     { "source": "/locations.html", "destination": "/contact", "permanent": true },
     { "source": "/locations", "destination": "/contact", "permanent": true },
-    { "source": "/blog.html", "destination": "/", "permanent": true },
-    { "source": "/blog", "destination": "/", "permanent": true }
+    { "source": "/blog.html", "destination": "/blog", "permanent": true }
   ]
 }
