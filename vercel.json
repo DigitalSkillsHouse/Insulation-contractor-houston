@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "headers": [
     {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
@@ -38,7 +46,8 @@
     { "source": "/services/attic-fan-ventilation", "destination": "/contact", "permanent": true },
     { "source": "/services", "destination": "/contact", "permanent": true },
     { "source": "/services/", "destination": "/contact", "permanent": true },
-    { "source": "/service-areas/cypress", "destination": "/insulation-cypress", "permanent": true },
+    { "source": "/services.html", "destination": "/contact", "permanent": true },
+    { "source": "/service-areas/cypress", "destination": "/contact", "permanent": true },
     { "source": "/service-areas", "destination": "/contact", "permanent": true },
     { "source": "/service-areas/", "destination": "/contact", "permanent": true },
     { "source": "/locations.html", "destination": "/contact", "permanent": true },
