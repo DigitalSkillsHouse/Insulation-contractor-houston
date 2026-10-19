@@ -105,6 +105,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Attic insulation service page -->
+  <url>
+    <loc>https://insulationcontractorhouston.com/attic-insulation</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Blog -->
   <url>
     <loc>https://insulationcontractorhouston.com/blog</loc>
@@ -121,6 +129,24 @@
   <url>
     <loc>https://insulationcontractorhouston.com/blog/blown-in-vs-fiberglass-insulation-cypress-tx</loc>
     <lastmod>2026-10-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://insulationcontractorhouston.com/blog/attic-insulation-spring-tx</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://insulationcontractorhouston.com/blog/insulation-contractor-conroe-tx</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://insulationcontractorhouston.com/blog/attic-insulation-kingwood-tx</loc>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
