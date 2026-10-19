@@ -170,7 +170,16 @@
       };
       try {
         const saved = localStorage.getItem('ich_site_settings') || localStorage.getItem('usa_site_settings');
-        if (saved) return { ...defaults, ...JSON.parse(saved) };
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Purge stale cache containing the old incorrect phone number
+          if (parsed.phone && parsed.phone.includes('409')) {
+            localStorage.removeItem('ich_site_settings');
+            localStorage.removeItem('usa_site_settings');
+            return defaults;
+          }
+          return { ...defaults, ...parsed };
+        }
       } catch (e) {}
       return defaults;
     },
