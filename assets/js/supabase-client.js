@@ -9,12 +9,19 @@
 
   const TOKEN_KEY = 'ich_access_token';
 
+  // In-memory session cache — verified once per page load, not on every call
+  let _cachedSession = null;
+
   function getToken() {
     return sessionStorage.getItem(TOKEN_KEY) || null;
   }
   function setToken(t) {
     if (t) sessionStorage.setItem(TOKEN_KEY, t);
     else sessionStorage.removeItem(TOKEN_KEY);
+  }
+  function clearSession() {
+    setToken(null);
+    _cachedSession = null;
   }
 
   // All admin data operations go through /api/admin (server-side, auth-gated)
@@ -46,6 +53,7 @@
             return { data: null, error: { message: data.error || 'Invalid credentials' } };
           }
           setToken(data.session.access_token);
+          _cachedSession = data.session;
           return { data: { session: data.session }, error: null };
         } catch (e) {
           return { data: null, error: { message: e.message } };
@@ -55,6 +63,13 @@
       async getSession() {
         const token = getToken();
         if (!token) return { data: { session: null }, error: null };
+
+        // Return cached session if the token matches — no extra API call
+        if (_cachedSession && _cachedSession.access_token === token) {
+          return { data: { session: _cachedSession }, error: null };
+        }
+
+        // First call this page load — verify once with the server
         try {
           const res = await fetch('/api/auth', {
             method: 'POST',
@@ -62,12 +77,19 @@
             body: JSON.stringify({ action: 'getUser', token })
           });
           const data = await res.json();
-          if (!res.ok || !data.user) {
-            setToken(null);
+          // Only clear token on explicit auth rejection (401/403)
+          if (res.status === 401 || res.status === 403) {
+            clearSession();
             return { data: { session: null }, error: null };
           }
-          return { data: { session: { access_token: token, user: data.user } }, error: null };
+          if (res.ok && data.user) {
+            _cachedSession = { access_token: token, user: data.user };
+            return { data: { session: _cachedSession }, error: null };
+          }
+          // Server error / cold start — don't clear token, let caller handle
+          return { data: { session: null }, error: { message: 'Verification unavailable' } };
         } catch (e) {
+          // Network error — don't clear token, assume still valid
           return { data: { session: null }, error: { message: e.message } };
         }
       },
@@ -79,6 +101,7 @@
 
       async signOut() {
         const token = getToken();
+        clearSession();
         if (token) {
           await fetch('/api/auth', {
             method: 'POST',
@@ -86,7 +109,6 @@
             body: JSON.stringify({ action: 'signOut', token })
           }).catch(() => {});
         }
-        setToken(null);
         return { error: null };
       },
 
