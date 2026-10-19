@@ -895,44 +895,70 @@
   }
 
   // Delete Lead using Custom Modal
+  // If lead is already cancelled (in recycle bin), permanently delete it.
+  // Otherwise move it to the recycle bin by setting status = 'cancelled'.
   function deleteLead(leadId) {
     if (!leadId) return;
     const lead = State.leads.find(l => l.id === leadId);
-    const name = lead ? lead.name : leadId;
-    openConfirmModal(
-      `Delete Lead ${leadId}?`,
-      `Are you sure you want to remove ${name} from your estimate leads database? This action cannot be undone.`,
-      'Delete Lead',
-      async () => {
-        const proceedBtn = document.getElementById('confirm-modal-proceed');
-        if (proceedBtn) {
-          proceedBtn.disabled = true;
-          proceedBtn.textContent = 'Deleting...';
-        }
+    if (!lead) return;
+    const name = lead.name;
+    const isInRecycleBin = lead.status === 'cancelled';
 
-        try {
-          const sbClient = getSupabase();
-          if (sbClient && typeof sbClient.deleteLead === 'function') {
-            await sbClient.deleteLead(leadId);
-          }
-
-          State.leads = State.leads.filter(l => l.id !== leadId);
-          saveLeads();
-          closeConfirmModal();
-          closeDrawer();
-          renderAll();
-          showToast(`Deleted lead ${leadId}`, 'success');
-        } catch (err) {
-          console.error('[Delete Lead Error]:', err);
-          showToast(`Failed to delete lead ${leadId} from database`, 'error');
-        } finally {
-          if (proceedBtn) {
-            proceedBtn.disabled = false;
-            proceedBtn.textContent = 'Delete Lead';
+    if (isInRecycleBin) {
+      openConfirmModal(
+        `Permanently Delete ${leadId}?`,
+        `Permanently remove ${name} from the database? This cannot be undone.`,
+        'Permanently Delete',
+        async () => {
+          const proceedBtn = document.getElementById('confirm-modal-proceed');
+          if (proceedBtn) { proceedBtn.disabled = true; proceedBtn.textContent = 'Deleting...'; }
+          try {
+            const sbClient = getSupabase();
+            if (sbClient && typeof sbClient.deleteLead === 'function') {
+              await sbClient.deleteLead(leadId);
+            }
+            State.leads = State.leads.filter(l => l.id !== leadId);
+            saveLeads();
+            closeConfirmModal();
+            closeDrawer();
+            renderAll();
+            showToast(`Permanently deleted lead ${leadId}`, 'success');
+          } catch (err) {
+            console.error('[Delete Lead Error]:', err);
+            showToast(`Failed to delete lead ${leadId} from database`, 'error');
+          } finally {
+            if (proceedBtn) { proceedBtn.disabled = false; proceedBtn.textContent = 'Permanently Delete'; }
           }
         }
-      }
-    );
+      );
+    } else {
+      openConfirmModal(
+        `Move ${leadId} to Recycle Bin?`,
+        `Move ${name} to the recycle bin? You can permanently delete or restore it from there.`,
+        'Move to Recycle Bin',
+        async () => {
+          const proceedBtn = document.getElementById('confirm-modal-proceed');
+          if (proceedBtn) { proceedBtn.disabled = true; proceedBtn.textContent = 'Moving...'; }
+          try {
+            const sbClient = getSupabase();
+            if (sbClient && typeof sbClient.updateStatus === 'function') {
+              await sbClient.updateStatus(leadId, 'cancelled');
+            }
+            lead.status = 'cancelled';
+            saveLeads();
+            closeConfirmModal();
+            closeDrawer();
+            renderAll();
+            showToast(`Moved lead ${leadId} to recycle bin`, 'success');
+          } catch (err) {
+            console.error('[Move to Recycle Bin Error]:', err);
+            showToast(`Failed to move lead ${leadId} to recycle bin`, 'error');
+          } finally {
+            if (proceedBtn) { proceedBtn.disabled = false; proceedBtn.textContent = 'Move to Recycle Bin'; }
+          }
+        }
+      );
+    }
   }
 
   // Dynamic Date-Bucket Calculation for Chart (7D, 30D, 90D)
