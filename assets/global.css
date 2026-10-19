@@ -47,7 +47,7 @@
   position: relative;
   z-index: 40;
   overflow: visible;
-  background: #ff5500; /* Vibrant Orange background behind top-left curve */
+  background: transparent;
   transition: box-shadow 0.3s;
 }
 
@@ -854,4 +854,37 @@
 .city-story p a:hover,
 .prose a:hover {
   color: var(--teal-900);
+}
+
+/* --- Home trust grid (3-column strip on homepage) --- */
+.home-trust-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.home-trust-grid .htg-item {
+  padding: 0 2rem;
+  border-right: 1px solid var(--line);
+}
+.home-trust-grid .htg-item:first-child {
+  padding-left: 0;
+}
+.home-trust-grid .htg-last {
+  border-right: none;
+  padding-right: 0;
+}
+@media (max-width: 768px) {
+  .home-trust-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .home-trust-grid .htg-item {
+    padding: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+  }
+  .home-trust-grid .htg-last {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 }
