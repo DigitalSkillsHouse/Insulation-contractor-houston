@@ -1,37 +1,105 @@
 /**
- * Insulation Contractor Houston - Supabase Database Integration Client
- * Handles lead persistence via edge API and admin panel data operations.
+ * Insulation Contractor Houston - Supabase Integration Client
+ * All database and auth operations are proxied through server-side edge functions.
+ * No secret keys are stored in this file.
  */
 
 (function () {
   'use strict';
 
-  const SUPABASE_URL = 'https://obpvzwzttrzqjamaouzh.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icHZ6d3p0dHJ6cWphbWFvdXpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTM1OTM0OCwiZXhwIjoyMTA2OTM1MzQ4fQ.7geqsygX_Ya2PDYIBjHkgz3yUc_vzTji_T7g-5UngqU';
-  const TABLE_NAME = 'leads';
+  const TOKEN_KEY = 'ich_access_token';
 
-  let client = null;
-
-  // Initialize Supabase SDK client (used in Admin Panel)
-  function getClient() {
-    if (client) return client;
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-      try {
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      } catch (e) {
-        console.warn('[Supabase] SDK Init Notice:', e.message);
-      }
-    }
-    return client;
+  function getToken() {
+    return sessionStorage.getItem(TOKEN_KEY) || null;
+  }
+  function setToken(t) {
+    if (t) sessionStorage.setItem(TOKEN_KEY, t);
+    else sessionStorage.removeItem(TOKEN_KEY);
   }
 
-  // Global API Interface
-  window.ICH_SUPABASE = {
-    getClient: getClient,
+  // All admin data operations go through /api/admin (server-side, auth-gated)
+  async function adminFetch(action, method, body) {
+    const token = getToken();
+    const opts = {
+      method: method || 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    };
+    if (token) opts.headers['Authorization'] = `Bearer ${token}`;
+    if (body && method !== 'GET') opts.body = JSON.stringify(body);
+    const res = await fetch(`/api/admin?action=${action}`, opts);
+    if (!res.ok) throw new Error(`API ${action}: ${res.status}`);
+    return res.json();
+  }
 
-    /**
-     * Save a new estimate lead via secure Vercel Edge API
-     */
+  // Mock Supabase client — exposes auth interface, proxied through /api/auth
+  const mockClient = {
+    auth: {
+      async signInWithPassword({ email, password }) {
+        try {
+          const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'signIn', email, password })
+          });
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            return { data: null, error: { message: data.error || 'Invalid credentials' } };
+          }
+          setToken(data.session.access_token);
+          return { data: { session: data.session }, error: null };
+        } catch (e) {
+          return { data: null, error: { message: e.message } };
+        }
+      },
+
+      async getSession() {
+        const token = getToken();
+        if (!token) return { data: { session: null }, error: null };
+        try {
+          const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getUser', token })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.user) {
+            setToken(null);
+            return { data: { session: null }, error: null };
+          }
+          return { data: { session: { access_token: token, user: data.user } }, error: null };
+        } catch (e) {
+          return { data: { session: null }, error: { message: e.message } };
+        }
+      },
+
+      async getUser() {
+        const { data } = await mockClient.auth.getSession();
+        return { data: { user: data?.session?.user || null } };
+      },
+
+      async signOut() {
+        const token = getToken();
+        if (token) {
+          await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'signOut', token })
+          }).catch(() => {});
+        }
+        setToken(null);
+        return { error: null };
+      },
+
+      onAuthStateChange() {
+        // Real-time not available without client SDK
+        return { data: { subscription: { unsubscribe: () => {} } } };
+      }
+    }
+  };
+
+  window.ICH_SUPABASE = {
+    getClient: () => mockClient,
+
     async saveLead(leadData) {
       const res = await fetch('/api/submit-lead', {
         method: 'POST',
@@ -43,180 +111,107 @@
       return res.json();
     },
 
-    /**
-     * Fetch all leads from Supabase database (Admin only)
-     */
     async getLeads() {
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from(TABLE_NAME).select('*').order('submitted_at', { ascending: false });
-          if (error) throw error;
-          if (Array.isArray(data)) return mapSupabaseLeads(data);
-        }
+        const data = await adminFetch('leads', 'GET');
+        if (Array.isArray(data)) return mapLeads(data);
       } catch (err) {
-        console.warn('[Supabase Fetch Warning]: Failed to fetch leads.', err.message);
+        console.warn('[Admin] getLeads:', err.message);
       }
       return null;
     },
 
-    /**
-     * Update status of a lead in Supabase database (Admin only)
-     */
     async updateStatus(leadId, status) {
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from(TABLE_NAME).update({ status }).eq('lead_id', leadId).select();
-          if (error) throw error;
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error(`Supabase updateStatus affected 0 rows for lead_id: ${leadId}`);
-          }
-          console.log(`[Supabase] Updated status for ${leadId} -> ${status}`);
-          return true;
-        }
+        const r = await adminFetch('updateStatus', 'POST', { leadId, status });
+        return r.success !== false;
       } catch (err) {
-        console.error('[Supabase Update Status Error]:', err.message);
+        console.error('[Admin] updateStatus:', err.message);
+        return false;
       }
-      return false;
     },
 
-    /**
-     * Update dispatcher notes for a lead in Supabase (Admin only)
-     */
     async updateNotes(leadId, notes) {
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from(TABLE_NAME).update({ notes }).eq('lead_id', leadId).select();
-          if (error) throw error;
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error(`Supabase updateNotes affected 0 rows for lead_id: ${leadId}`);
-          }
-          console.log(`[Supabase] Updated notes for ${leadId}`);
-          return true;
-        }
+        const r = await adminFetch('updateNotes', 'POST', { leadId, notes });
+        return r.success !== false;
       } catch (err) {
-        console.error('[Supabase Update Notes Error]:', err.message);
+        console.error('[Admin] updateNotes:', err.message);
+        return false;
       }
-      return false;
     },
 
-    /**
-     * Update estimated project value for a lead in Supabase (Admin only)
-     */
     async updateValue(leadId, value) {
-      const numValue = Number(value) || 0;
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from(TABLE_NAME).update({ value: numValue }).eq('lead_id', leadId).select();
-          if (error) throw error;
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error(`Supabase updateValue affected 0 rows for lead_id: ${leadId}`);
-          }
-          console.log(`[Supabase] Updated value for ${leadId} -> $${numValue}`);
-          return true;
-        }
+        const r = await adminFetch('updateValue', 'POST', { leadId, value });
+        return r.success !== false;
       } catch (err) {
-        console.error('[Supabase Update Value Error]:', err.message);
+        console.error('[Admin] updateValue:', err.message);
+        return false;
       }
-      return false;
     },
 
-    /**
-     * Delete a lead from Supabase database (Admin only)
-     */
     async deleteLead(leadId) {
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from(TABLE_NAME).delete().eq('lead_id', leadId).select();
-          if (error) throw error;
-          console.log(`[Supabase] Successfully processed delete query for lead ${leadId}`);
-          return true;
-        }
+        const r = await adminFetch('deleteLead', 'POST', { leadId });
+        return r.success !== false;
       } catch (err) {
-        console.error('[Supabase Delete Error]:', err.message);
+        console.error('[Admin] deleteLead:', err.message);
+        return false;
       }
-      return false;
     },
 
-    /**
-     * Get Site Settings (from LocalStorage & Supabase)
-     */
     getSettings() {
-      const DEFAULT_SETTINGS = {
-        phone: '+1 409-996-4620',
+      const defaults = {
+        phone: '(832) 291-2738',
         email: 'info@insulationcontractorhouston.com',
-        address: '23407 Snook Ln Bldg 1, Tomball, TX 77375',
+        address: 'Cypress Farms Ranch Rd, Houston, TX 77429',
         hours: 'Mon–Fri 9am–6pm'
       };
-
       try {
         const saved = localStorage.getItem('ich_site_settings') || localStorage.getItem('usa_site_settings');
-        if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+        if (saved) return { ...defaults, ...JSON.parse(saved) };
       } catch (e) {}
-
-      return DEFAULT_SETTINGS;
+      return defaults;
     },
 
-    /**
-     * Fetch remote site settings from Supabase database (Asynchronous background sync)
-     */
     async fetchSettings() {
       const current = this.getSettings();
       try {
-        const sb = getClient();
-        if (sb) {
-          const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).maybeSingle();
-          if (!error && data) {
-            const updated = {
-              phone: data.phone || current.phone,
-              email: data.email || current.email,
-              address: data.address || current.address,
-              hours: data.hours || current.hours
-            };
-            localStorage.setItem('ich_site_settings', JSON.stringify(updated));
-            this.applySettingsToDOM(updated);
-            return updated;
-          }
+        const data = await adminFetch('settings', 'GET');
+        if (data && data.phone) {
+          const updated = {
+            phone: data.phone || current.phone,
+            email: data.email || current.email,
+            address: data.address || current.address,
+            hours: data.hours || current.hours
+          };
+          localStorage.setItem('ich_site_settings', JSON.stringify(updated));
+          this.applySettingsToDOM(updated);
+          return updated;
         }
       } catch (e) {
-        console.warn('[Supabase Settings Fetch Notice]:', e.message);
+        console.warn('[Settings Fetch]:', e.message);
       }
       return current;
     },
 
-    /**
-     * Save Site Settings to LocalStorage & Supabase
-     */
     async saveSettings(newSettings) {
       const current = this.getSettings();
       const updated = { ...current, ...newSettings };
       localStorage.setItem('ich_site_settings', JSON.stringify(updated));
-
       try {
-        const sb = getClient();
-        if (sb) {
-          await sb.from('site_settings').upsert([{ id: 1, ...updated }]);
-        }
+        await adminFetch('saveSettings', 'POST', updated);
       } catch (e) {
-        console.warn('[Supabase Settings Save Notice]:', e.message);
+        console.warn('[Settings Save]:', e.message);
       }
-
       this.applySettingsToDOM(updated);
       return updated;
     },
 
-    /**
-     * Apply Settings dynamically across website DOM elements (Phone links, Email links, Address)
-     */
     applySettingsToDOM(settings) {
       const cfg = settings || this.getSettings();
       if (!cfg) return;
-
-      // Update All Phone Links
       if (cfg.phone) {
         const cleanPhone = cfg.phone.replace(/[^0-9+]/g, '');
         document.querySelectorAll('a[href^="tel:"]').forEach(el => {
@@ -236,8 +231,6 @@
           }
         });
       }
-
-      // Update All Email Links
       if (cfg.email) {
         document.querySelectorAll('a[href^="mailto:"]').forEach(el => {
           el.href = `mailto:${cfg.email}`;
@@ -249,11 +242,9 @@
     }
   };
 
-  // Backward compatibility alias for legacy scripts
   window.USA_SUPABASE = window.ICH_SUPABASE;
 
-  // Helper to map DB columns to frontend lead structure
-  function mapSupabaseLeads(dbLeads) {
+  function mapLeads(dbLeads) {
     return dbLeads.map(l => ({
       id: l.lead_id || l.id || 'ICH-0000',
       name: l.name || 'Anonymous',
@@ -271,35 +262,27 @@
     }));
   }
 
-  // DOM initialization
   document.addEventListener('DOMContentLoaded', () => {
-    // Apply saved site settings across DOM
-    if (window.ICH_SUPABASE && typeof window.ICH_SUPABASE.applySettingsToDOM === 'function') {
-      window.ICH_SUPABASE.applySettingsToDOM();
-      if (typeof window.ICH_SUPABASE.fetchSettings === 'function') {
-        window.ICH_SUPABASE.fetchSettings();
-      }
+    window.ICH_SUPABASE.applySettingsToDOM();
+    // Only fetch remote settings when authenticated (admin panel after login)
+    if (getToken()) {
+      window.ICH_SUPABASE.fetchSettings();
     }
 
-    // Automatic Phone Call Click Capture
     document.querySelectorAll('a[href^="tel:"]').forEach(link => {
       link.addEventListener('click', () => {
         const phone = link.href.replace('tel:', '');
-        const callLead = {
+        window.ICH_SUPABASE.saveLead({
           name: 'Phone Caller (Click-to-Call)',
-          phone: phone || '+1 409-996-4620',
+          phone: phone || '+18322912738',
           email: '',
           zip: 'Spring Area',
           service: 'Phone Inquiry',
-          notes: `Click-to-call initiated from ${window.location.pathname}`,
+          notes: `Click-to-call from ${window.location.pathname}`,
           pageUrl: window.location.href,
           type: 'Phone Call Click',
           status: 'new'
-        };
-        console.log('[Call Capture] Saving phone call click event via edge function:', callLead);
-        window.ICH_SUPABASE.saveLead(callLead).catch(err => {
-          console.warn('[Call Capture Error]:', err.message);
-        });
+        }).catch(err => console.warn('[Call Capture]:', err.message));
       });
     });
   });
