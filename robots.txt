@@ -28,4 +28,13 @@ Allow: /
 User-agent: YouBot
 Allow: /
 
+User-agent: Applebot
+Allow: /
+
+User-agent: Googlebot-Extended
+Allow: /
+
+# LLMs.txt — machine-readable site summary for AI systems
+# https://insulationcontractorhouston.com/llms.txt
+
 Sitemap: https://insulationcontractorhouston.com/sitemap.xml
