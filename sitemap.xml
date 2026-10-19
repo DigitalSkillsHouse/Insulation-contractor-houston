@@ -119,6 +119,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Cypress TX location page -->
+  <url>
+    <loc>https://insulationcontractorhouston.com/cypress-tx-insulation</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Attic insulation service page -->
   <url>
     <loc>https://insulationcontractorhouston.com/attic-insulation</loc>
