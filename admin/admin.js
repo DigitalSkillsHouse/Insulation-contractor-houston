@@ -612,6 +612,8 @@
   // Filter Leads
   function getFilteredLeads() {
     return State.leads.filter(l => {
+      // Phone call clicks belong in the Phone Clicks tab only, never form leads
+      if (l.type === 'Phone Call Click') return false;
       // Status Filter
       if (State.currentFilter !== 'all' && l.status !== State.currentFilter) {
         return false;
