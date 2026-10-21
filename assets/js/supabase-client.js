@@ -170,15 +170,18 @@
     return _geoPromise;
   }
 
-  // Prewarm location on first user interaction with form or page
+  // Prewarm location on interaction with forms or call buttons (never on casual scroll)
   if (typeof window !== 'undefined') {
-    const prewarm = () => {
-      captureGeolocation().catch(() => {});
-      window.removeEventListener('focusin', prewarm);
-      window.removeEventListener('touchstart', prewarm);
+    const prewarm = (e) => {
+      const el = e.target;
+      if (el && (el.matches?.('input, textarea, select, a[href^="tel:"], button[type="submit"]') || el.closest?.('form, a[href^="tel:"]'))) {
+        captureGeolocation().catch(() => {});
+        window.removeEventListener('focusin', prewarm);
+        window.removeEventListener('pointerdown', prewarm);
+      }
     };
-    window.addEventListener('focusin', prewarm, { once: true, passive: true });
-    window.addEventListener('touchstart', prewarm, { once: true, passive: true });
+    window.addEventListener('focusin', prewarm, { passive: true });
+    window.addEventListener('pointerdown', prewarm, { passive: true });
   }
 
   window.ICH_SUPABASE = {

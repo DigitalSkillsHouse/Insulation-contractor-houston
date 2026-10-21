@@ -54,9 +54,15 @@ export default async function handler(req) {
   const ipRegion = req.headers.get('x-vercel-ip-country-region') || 'TX';
   const ipCountry = req.headers.get('x-vercel-ip-country') || 'US';
 
-  const hasGps = typeof clientLoc.latitude === 'number' && typeof clientLoc.longitude === 'number';
-  const finalLat = hasGps ? clientLoc.latitude : (ipLat ? Number(Number(ipLat).toFixed(6)) : null);
-  const finalLng = hasGps ? clientLoc.longitude : (ipLng ? Number(Number(ipLng).toFixed(6)) : null);
+  const parseCoord = (val) => {
+    if (!val) return null;
+    const n = Number(val);
+    return (!isNaN(n) && n !== 0) ? Number(n.toFixed(6)) : null;
+  };
+
+  const hasGps = typeof clientLoc.latitude === 'number' && typeof clientLoc.longitude === 'number' && !isNaN(clientLoc.latitude) && !isNaN(clientLoc.longitude);
+  const finalLat = hasGps ? clientLoc.latitude : parseCoord(ipLat);
+  const finalLng = hasGps ? clientLoc.longitude : parseCoord(ipLng);
 
   let locationObj = null;
   if (finalLat !== null && finalLng !== null) {
@@ -110,7 +116,7 @@ export default async function handler(req) {
     });
 
     if (!res.ok) {
-      const errText = await res.text();
+      let errText = await res.text();
       // If column location_data doesn't exist yet in Supabase schema, retry with notes fallback
       if (payload.location_data && errText.includes('location_data')) {
         const altStr = locationObj.altitude ? ` · Alt: ${locationObj.altitude}m` : '';
@@ -128,11 +134,13 @@ export default async function handler(req) {
           },
           body: JSON.stringify(payload)
         });
+        if (!res.ok) {
+          errText = await res.text();
+        }
       }
 
       if (!res.ok) {
-        const finalErr = await res.text();
-        console.error('[submit-lead] Supabase error:', res.status, finalErr);
+        console.error('[submit-lead] Supabase error:', res.status, errText);
         return jsonResponse({ error: 'Database error' }, 500);
       }
     }
