@@ -259,16 +259,6 @@
       });
     }
 
-    // Lead Drawer Delete Button Listener
-    const drawerDeleteBtn = document.getElementById('drawer-delete-lead');
-    if (drawerDeleteBtn) {
-      drawerDeleteBtn.addEventListener('click', () => {
-        if (State.selectedLead && State.selectedLead.id) {
-          deleteLead(State.selectedLead.id);
-        }
-      });
-    }
-
     // Confirmation Modal Event Listeners
     const modalConfirm = document.getElementById('modal-confirm');
     const proceedBtn = document.getElementById('confirm-modal-proceed');
@@ -317,11 +307,6 @@
       console.warn('[Auth Check Error]:', e.message);
     }
 
-    if (sessionStorage.getItem('ich_admin_auth') === 'true') {
-      State.isAuthenticated = true;
-      if (DOM.loginScreen) DOM.loginScreen.style.display = 'none';
-      return true;
-    }
 
     State.isAuthenticated = false;
     if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
@@ -366,12 +351,6 @@
         }
       }
 
-      // Fallback session if password passes
-      if (!authenticated && email && password.length >= 4) {
-        sessionStorage.setItem('ich_admin_auth', 'true');
-        authenticated = true;
-      }
-
       if (!authenticated) {
         throw new Error('Invalid email or password.');
       }
@@ -405,7 +384,9 @@
     } catch (err) {
       console.warn('[Logout Error]:', err.message);
     }
+    // Clear both current and legacy session keys
     sessionStorage.removeItem('ich_admin_auth');
+    localStorage.removeItem('ich_admin_auth');
     State.isAuthenticated = false;
     if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
     showToast('Signed out successfully.');
@@ -805,8 +786,6 @@
         const sbClient = getSupabase();
         if (sbClient && typeof sbClient.updateStatus === 'function') {
           success = await sbClient.updateStatus(lead.id, newStatus);
-        } else {
-          success = true;
         }
 
         statusSelect.disabled = false;
@@ -836,8 +815,6 @@
         const sbClient = getSupabase();
         if (sbClient && typeof sbClient.updateNotes === 'function') {
           success = await sbClient.updateNotes(lead.id, newNotes);
-        } else {
-          success = true;
         }
 
         saveNotesBtn.disabled = false;

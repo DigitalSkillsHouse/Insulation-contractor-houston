@@ -4,3 +4,6 @@ node_modules
 
 .vercel
 .env*
+
+# Google service account credentials — never commit
+gsc-credentials.json

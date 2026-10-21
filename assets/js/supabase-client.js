@@ -13,11 +13,11 @@
   let _cachedSession = null;
 
   function getToken() {
-    return sessionStorage.getItem(TOKEN_KEY) || null;
+    return localStorage.getItem(TOKEN_KEY) || null;
   }
   function setToken(t) {
-    if (t) sessionStorage.setItem(TOKEN_KEY, t);
-    else sessionStorage.removeItem(TOKEN_KEY);
+    if (t) localStorage.setItem(TOKEN_KEY, t);
+    else localStorage.removeItem(TOKEN_KEY);
   }
   function clearSession() {
     setToken(null);

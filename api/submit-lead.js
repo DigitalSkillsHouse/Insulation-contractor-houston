@@ -47,7 +47,7 @@ export default async function handler(req) {
   }
 
   const generateId = () =>
-    'ICH-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+    'ICH-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
   const payload = {
     lead_id:      generateId(),
