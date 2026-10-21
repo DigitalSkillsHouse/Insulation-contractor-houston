@@ -46,6 +46,35 @@ export default async function handler(req) {
     return jsonResponse({ error: 'Name or phone required' }, 422);
   }
 
+  // Geolocation handling: client GPS or server-side Vercel edge IP fallback
+  const clientLoc = (body.location_data && typeof body.location_data === 'object') ? body.location_data : {};
+  const ipLat = req.headers.get('x-vercel-ip-latitude');
+  const ipLng = req.headers.get('x-vercel-ip-longitude');
+  const ipCity = req.headers.get('x-vercel-ip-city') ? decodeURIComponent(req.headers.get('x-vercel-ip-city')) : '';
+  const ipRegion = req.headers.get('x-vercel-ip-country-region') || 'TX';
+  const ipCountry = req.headers.get('x-vercel-ip-country') || 'US';
+
+  const hasGps = typeof clientLoc.latitude === 'number' && typeof clientLoc.longitude === 'number';
+  const finalLat = hasGps ? clientLoc.latitude : (ipLat ? Number(Number(ipLat).toFixed(6)) : null);
+  const finalLng = hasGps ? clientLoc.longitude : (ipLng ? Number(Number(ipLng).toFixed(6)) : null);
+
+  let locationObj = null;
+  if (finalLat !== null && finalLng !== null) {
+    locationObj = {
+      latitude: finalLat,
+      longitude: finalLng,
+      altitude: hasGps && typeof clientLoc.altitude === 'number' ? clientLoc.altitude : null,
+      accuracy: hasGps && typeof clientLoc.accuracy === 'number' ? clientLoc.accuracy : 5000,
+      altitudeAccuracy: hasGps && typeof clientLoc.altitudeAccuracy === 'number' ? clientLoc.altitudeAccuracy : null,
+      source: hasGps ? 'GPS' : 'IP Geolocation',
+      city: clientLoc.city || ipCity || body.city || 'Houston Area',
+      region: clientLoc.region || ipRegion || 'Texas',
+      country: clientLoc.country || ipCountry || 'United States',
+      maps_url: `https://www.google.com/maps?q=${finalLat},${finalLng}`,
+      captured_at: new Date().toISOString()
+    };
+  }
+
   const generateId = () =>
     'ICH-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
@@ -55,7 +84,7 @@ export default async function handler(req) {
     phone:        phoneVal.slice(0, 50),
     email:        (typeof body.email === 'string' ? body.email : '').trim().slice(0, 255),
     zip:          (typeof body.zip === 'string' ? body.zip : '').trim().slice(0, 20),
-    city:         (typeof body.city === 'string' ? body.city : 'Spring Area, TX').trim().slice(0, 100),
+    city:         (typeof body.city === 'string' ? body.city : (locationObj?.city || 'Spring Area, TX')).trim().slice(0, 100),
     service:      (typeof body.service === 'string' ? body.service : 'Attic Insulation').trim().slice(0, 100),
     type:         (typeof body.type === 'string' ? body.type : 'Form Submission').trim().slice(0, 50),
     status:       'new',
@@ -64,8 +93,12 @@ export default async function handler(req) {
     submitted_at: new Date().toISOString()
   };
 
+  if (locationObj) {
+    payload.location_data = locationObj;
+  }
+
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_SERVICE_KEY,
@@ -77,10 +110,31 @@ export default async function handler(req) {
     });
 
     if (!res.ok) {
-      const text = await res.text();
-      console.error('[submit-lead] Supabase error:', res.status, text);
+      const errText = await res.text();
+      // If column location_data doesn't exist yet in Supabase schema, retry with notes fallback
+      if (payload.location_data && errText.includes('location_data')) {
+        const altStr = locationObj.altitude ? ` · Alt: ${locationObj.altitude}m` : '';
+        const locNote = `\n[VISITOR LOCATION: ${locationObj.city}, ${locationObj.region}, ${locationObj.country} (${locationObj.source}) | ±${locationObj.accuracy}m${altStr} | ${locationObj.latitude}, ${locationObj.longitude}]`;
+        delete payload.location_data;
+        payload.notes = ((payload.notes || '') + locNote).slice(0, 5000);
 
-      return jsonResponse({ error: 'Database error' }, 500);
+        res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if (!res.ok) {
+        const finalErr = await res.text();
+        console.error('[submit-lead] Supabase error:', res.status, finalErr);
+        return jsonResponse({ error: 'Database error' }, 500);
+      }
     }
 
     return jsonResponse({

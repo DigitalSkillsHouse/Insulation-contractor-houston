@@ -750,6 +750,37 @@
     document.getElementById('drawer-service').textContent = lead.service;
     document.getElementById('drawer-date').textContent = lead.date;
 
+    // Populate Visitor Location Card
+    const loc = lead.location_data;
+    const locNameEl = document.getElementById('drawer-loc-name');
+    const locAccEl = document.getElementById('drawer-loc-acc');
+    const locCoordsEl = document.getElementById('drawer-loc-coords');
+    const locMapLinkEl = document.getElementById('drawer-loc-maplink');
+
+    if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+      const cityStr = [loc.city || lead.city, loc.region || 'Texas', loc.country || 'United States'].filter(Boolean).join(', ');
+      const srcLabel = loc.source ? ` (${loc.source})` : '';
+      if (locNameEl) locNameEl.textContent = `${cityStr}${srcLabel}`;
+
+      const accStr = loc.accuracy ? `±${loc.accuracy} m` : 'Standard accuracy';
+      const altStr = (loc.altitude !== null && loc.altitude !== undefined) ? ` · Alt: ${loc.altitude} m` : '';
+      if (locAccEl) locAccEl.textContent = `${accStr}${altStr}`;
+
+      const latFixed = Number(loc.latitude).toFixed(5);
+      const lngFixed = Number(loc.longitude).toFixed(5);
+      if (locCoordsEl) locCoordsEl.textContent = `${latFixed}, ${lngFixed}`;
+
+      if (locMapLinkEl) {
+        locMapLinkEl.href = loc.maps_url || `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`;
+        locMapLinkEl.style.display = 'inline';
+      }
+    } else {
+      if (locNameEl) locNameEl.textContent = `${lead.city || 'Houston, Texas'} (Estimated)`;
+      if (locAccEl) locAccEl.textContent = 'Approximate Area · No GPS payload';
+      if (locCoordsEl) locCoordsEl.textContent = 'Coordinates not captured';
+      if (locMapLinkEl) locMapLinkEl.style.display = 'none';
+    }
+
     const notesArea = document.getElementById('drawer-notes');
     if (notesArea) notesArea.value = lead.notes || '';
 

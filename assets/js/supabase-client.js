@@ -119,10 +119,82 @@
     }
   };
 
+  // Geolocation pre-warmer and high-accuracy capture
+  let _cachedGeo = null;
+  let _geoPromise = null;
+
+  function captureGeolocation() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(null);
+    if (_cachedGeo && (Date.now() - _cachedGeo.cached_at < 300000)) return Promise.resolve(_cachedGeo);
+    if (_geoPromise) return _geoPromise;
+
+    _geoPromise = new Promise((resolve) => {
+      let done = false;
+      const finish = (val) => {
+        if (!done) {
+          done = true;
+          _cachedGeo = val;
+          _geoPromise = null;
+          resolve(val);
+        }
+      };
+
+      const timer = setTimeout(() => finish(null), 2500);
+
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            clearTimeout(timer);
+            finish({
+              latitude: Number(pos.coords.latitude.toFixed(6)),
+              longitude: Number(pos.coords.longitude.toFixed(6)),
+              altitude: pos.coords.altitude !== null ? Number(pos.coords.altitude.toFixed(1)) : null,
+              accuracy: Math.round(pos.coords.accuracy),
+              altitudeAccuracy: pos.coords.altitudeAccuracy !== null ? Math.round(pos.coords.altitudeAccuracy) : null,
+              source: 'GPS',
+              cached_at: Date.now()
+            });
+          },
+          () => {
+            clearTimeout(timer);
+            finish(null);
+          },
+          { enableHighAccuracy: true, timeout: 2500, maximumAge: 60000 }
+        );
+      } catch (e) {
+        clearTimeout(timer);
+        finish(null);
+      }
+    });
+
+    return _geoPromise;
+  }
+
+  // Prewarm location on first user interaction with form or page
+  if (typeof window !== 'undefined') {
+    const prewarm = () => {
+      captureGeolocation().catch(() => {});
+      window.removeEventListener('focusin', prewarm);
+      window.removeEventListener('touchstart', prewarm);
+    };
+    window.addEventListener('focusin', prewarm, { once: true, passive: true });
+    window.addEventListener('touchstart', prewarm, { once: true, passive: true });
+  }
+
   window.ICH_SUPABASE = {
     getClient: () => mockClient,
 
     async saveLead(leadData) {
+      if (!leadData.location_data) {
+        // Use cached location or wait up to 1.2s so submission never stalls
+        const loc = _cachedGeo || await Promise.race([
+          captureGeolocation(),
+          new Promise((r) => setTimeout(() => r(null), 1200))
+        ]);
+        if (loc) {
+          leadData.location_data = loc;
+        }
+      }
       const res = await fetch('/api/submit-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -276,21 +348,46 @@
   window.USA_SUPABASE = window.ICH_SUPABASE;
 
   function mapLeads(dbLeads) {
-    return dbLeads.map(l => ({
-      id: l.lead_id || l.id || 'ICH-0000',
-      name: l.name || 'Anonymous',
-      phone: l.phone || '',
-      email: l.email || '',
-      zip: l.zip || '',
-      city: l.city || 'Spring Area, TX',
-      service: l.service || 'Attic Insulation',
-      type: l.type || 'Form Submission',
-      status: l.status || 'new',
-      date: l.submitted_at ? l.submitted_at.substring(0, 16).replace('T', ' ') : new Date().toISOString().substring(0, 16),
-      submitted_at: l.submitted_at || new Date().toISOString(),
-      notes: l.notes || '',
-      value: Number(l.value) || 0
-    }));
+    return dbLeads.map(l => {
+      let loc = l.location_data || null;
+      if (typeof loc === 'string') {
+        try { loc = JSON.parse(loc); } catch (e) { loc = null; }
+      }
+      // Fallback regex parser if location was stored inside notes string
+      if (!loc && typeof l.notes === 'string' && l.notes.includes('[VISITOR LOCATION:')) {
+        const m = l.notes.match(/\[VISITOR LOCATION:\s*([^|(]+?)(?:\s*\(([^)]+)\))?\s*\|\s*([^|]+?)\s*\|\s*(-?[\d.]+),\s*(-?[\d.]+)(?:[^\]]*)\]/i);
+        if (m) {
+          const accMatch = m[3].match(/±?(\d+)/);
+          const altMatch = m[3].match(/Alt:\s*([\d.]+)/i);
+          loc = {
+            city: m[1]?.trim() || '',
+            source: m[2]?.trim() || 'GPS',
+            accuracy: accMatch ? Number(accMatch[1]) : 12,
+            altitude: altMatch ? Number(altMatch[1]) : null,
+            latitude: Number(m[4]),
+            longitude: Number(m[5]),
+            maps_url: `https://www.google.com/maps?q=${m[4]},${m[5]}`
+          };
+        }
+      }
+
+      return {
+        id: l.lead_id || l.id || 'ICH-0000',
+        name: l.name || 'Anonymous',
+        phone: l.phone || '',
+        email: l.email || '',
+        zip: l.zip || '',
+        city: l.city || 'Spring Area, TX',
+        service: l.service || 'Attic Insulation',
+        type: l.type || 'Form Submission',
+        status: l.status || 'new',
+        date: l.submitted_at ? l.submitted_at.substring(0, 16).replace('T', ' ') : new Date().toISOString().substring(0, 16),
+        submitted_at: l.submitted_at || new Date().toISOString(),
+        notes: l.notes || '',
+        value: Number(l.value) || 0,
+        location_data: loc
+      };
+    });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
