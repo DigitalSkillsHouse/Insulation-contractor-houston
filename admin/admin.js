@@ -340,20 +340,19 @@
     try {
       const sbClient = getSupabase();
       const sb = sbClient ? sbClient.getClient() : null;
-      if (sb && sb.auth) {
-        try {
-          const { data, error } = await sb.auth.signInWithPassword({ email, password });
-          if (!error && data?.session) {
-            authenticated = true;
-          }
-        } catch (e) {
-          console.warn('[Supabase Auth Signin Notice]:', e.message);
-        }
+      if (!sb || !sb.auth) {
+        throw new Error('Supabase client is not loaded. Please refresh the page.');
       }
 
-      if (!authenticated) {
-        throw new Error('Invalid email or password.');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        throw new Error(error.message || 'Invalid email or password.');
       }
+      if (!data?.session) {
+        throw new Error('Authentication succeeded but no session was returned.');
+      }
+
+      authenticated = true;
 
       State.isAuthenticated = true;
       if (DOM.loginScreen) DOM.loginScreen.style.display = 'none';
