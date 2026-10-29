@@ -1,0 +1,13 @@
+# Files that must never be published with the website
+.env*
+tools/
+site content/
+node_modules/
+netlify/
+netlify.toml
+_redirects
+package.json
+package-lock.json
+README.md
+GEOLOCATION_SYSTEM_PLAN.md
+scripts/

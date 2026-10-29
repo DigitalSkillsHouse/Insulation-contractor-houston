@@ -263,7 +263,7 @@
         phone: '(832) 291-2738',
         email: 'info@insulationcontractorhouston.com',
         address: 'Cypress Farms Ranch Rd, Houston, TX 77429',
-        hours: 'Mon–Fri 9am–6pm'
+        hours: 'Mon–Sat 8am–6pm'
       };
       try {
         const saved = localStorage.getItem('ich_site_settings') || localStorage.getItem('usa_site_settings');
@@ -394,7 +394,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    window.ICH_SUPABASE.applySettingsToDOM();
+    // Public pages always show the numbers written in their HTML. Saved settings (browser
+    // cache / admin edits) are only applied inside the admin panel, so a stale cached value
+    // can never put an old phone number on the live site.
+    if (location.pathname.indexOf('/admin') === 0) {
+      window.ICH_SUPABASE.applySettingsToDOM();
+    }
     // Only fetch remote settings when authenticated (admin panel after login)
     if (getToken()) {
       window.ICH_SUPABASE.fetchSettings();

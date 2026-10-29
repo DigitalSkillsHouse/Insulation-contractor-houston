@@ -889,3 +889,55 @@
   }
 }
 a[href^="tel:"] *{pointer-events:none}
+
+/* --- Ponytail Fixes: Navigation, Alignment, Mobile & Layout --- */
+@media (min-width: 901px) {
+  /* Dropdown hover bridge to eliminate 14px dead gap */
+  .nav-dd-panel::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: 0;
+    right: 0;
+    height: 16px;
+  }
+}
+
+/* Fix 3: iOS Safari auto-zoom prevention (inputs < 16px trigger zoom) */
+@media (max-width: 900px) {
+  .request-card input,
+  .request-card select,
+  .contact-form input,
+  .contact-form select,
+  .contact-form textarea,
+  #newsletter-form input {
+    font-size: 16px !important;
+  }
+}
+
+/* Fix 4: Mobile sticky call button bottom clearance */
+@media (max-width: 768px) {
+  .contact-form,
+  #hero-request-form,
+  #service-area-form {
+    margin-bottom: 24px;
+  }
+  .shell.footer-bottom {
+    padding-bottom: 84px;
+  }
+}
+
+/* Fix 5: Hero wave color match and sub-pixel gap */
+.hero-wave {
+  bottom: -2px;
+}
+.hero-wave path {
+  fill: var(--cream) !important;
+}
+
+/* Fix 6: Table cell readability on narrow viewports */
+.section table th,
+.section table td {
+  min-width: 140px;
+}
+:where(img[width][height]){height:auto}

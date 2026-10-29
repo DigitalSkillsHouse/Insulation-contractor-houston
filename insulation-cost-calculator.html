@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0d1f3c">
   <title>Insulation Cost Calculator Houston TX | Instant Estimate</title>
-  <meta name="description" content="Free insulation cost calculator for Houston TX homes. Instant estimate for attic, spray foam, blown-in, or wall insulation. No sign-up needed.">
+  <meta name="description" content="Free insulation cost calculator for Houston TX homes. Answer a few questions and get a realistic price range for attic, spray foam, blown-in or wall insulation.">
   <meta name="author" content="Insulation Contractor Houston">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://insulationcontractorhouston.com/insulation-cost-calculator">
@@ -82,7 +82,7 @@
       "name": "How much does insulation cost in Houston TX?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Insulation costs in Houston TX typically range from $1.00–$2.50 per square foot for blown-in attic insulation, $1.50–$3.50 per square foot for open-cell spray foam, and $3.00–$7.00 per square foot for closed-cell spray foam. A 1,500 sq ft attic with blown-in insulation runs approximately $1,500–$3,000. Prices depend on current R-value, target R-value, access conditions, and any removal needed."
+        "text": "Insulation costs in Houston TX typically range from $1.00–$1.50 per square foot for blown-in attic insulation, $1.50–$3.50 per square foot for open-cell spray foam, and $2.00–$4.00 per square foot for closed-cell spray foam, depending on foam thickness. A 1,500 sq ft attic with blown-in insulation runs approximately $1,500–$2,250. Removing old insulation adds $1.00–$2.00 per square foot, attic air sealing is typically $250–$1,500, and a solar attic fan runs about $600–$1,600 installed. Prices depend on current R-value, target R-value, access conditions, and any removal needed."
       }
     },
     {
@@ -133,131 +133,173 @@
   <link rel="stylesheet" href="assets/global.css" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-44WSYC407H"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M8F53Y2T6K"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-44WSYC407H');
+    gtag('config', 'G-M8F53Y2T6K');
   </script>
 
   <style>
-    /* ── Calculator page styles ── */
+    /* ── Calculator page styles (multi-step wizard) ── */
     .calc-hero {
-      background: linear-gradient(135deg, #0d1f3c 0%, #1a3a6b 100%);
+      background: linear-gradient(135deg, #0d1f3c 0%, #1a3358 100%);
       color: #fff;
-      padding: 60px 0 50px;
+      padding: 56px 0 104px;
       text-align: center;
     }
-    .calc-hero h1 { font-size: clamp(1.75rem, 4vw, 2.6rem); margin-bottom: .5rem; color: #fff; }
-    .calc-hero p  { font-size: 1.1rem; opacity: .85; max-width: 600px; margin: 0 auto 1.5rem; }
-    .calc-hero .hero-badges { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-    .calc-hero .badge { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:20px; padding:4px 14px; font-size:.82rem; font-weight:600; }
+    .calc-hero h1 { font-size: clamp(1.8rem, 4.4vw, 2.7rem); margin-bottom: .6rem; color: #fff; }
+    .calc-hero p  { font-size: 1.05rem; opacity: .88; max-width: 620px; margin: 0 auto 1.4rem; }
+    .calc-hero p a { color: #fbc49a; text-decoration: underline; }
+    .calc-hero .hero-badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .calc-hero .badge { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:5px 14px; font-size:.82rem; font-weight:600; }
 
-    .calc-section { padding: 56px 0; }
-    .calc-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 36px;
-      align-items: start;
-    }
-    @media (max-width: 768px) {
-      .calc-grid { grid-template-columns: 1fr; }
-    }
-
-    .calc-card {
+    .calc-section { padding: 0 0 56px; }
+    .calc-section .breadcrumbs { margin: 18px 0 0; }
+    .wiz { max-width: 800px; margin: -72px auto 0; position: relative; z-index: 2; }
+    .wiz-card {
       background: #fff;
-      border: 1px solid #e4e9f0;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 4px 24px rgba(13,31,60,.07);
-    }
-    .calc-card h2 { font-size: 1.25rem; margin-bottom: 1.5rem; color: #0d1f3c; }
-
-    .form-group { margin-bottom: 20px; }
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      font-size: .9rem;
-      color: #0d1f3c;
-      margin-bottom: 6px;
-    }
-    .form-group label span { font-weight:400; color:#5a6a85; font-size:.82rem; }
-    .form-group select,
-    .form-group input[type="number"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #d0d8e8;
-      border-radius: 8px;
-      font-size: .95rem;
-      font-family: inherit;
-      color: #0d1f3c;
-      background: #f8fafd;
-      transition: border-color .2s;
-      box-sizing: border-box;
-    }
-    .form-group select:focus,
-    .form-group input[type="number"]:focus {
-      outline: none;
-      border-color: #1a6ed8;
-      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 40px);
     }
 
-    .range-wrap { position: relative; }
-    .range-wrap input[type="range"] {
-      width: 100%;
-      accent-color: #1a6ed8;
-      cursor: pointer;
-    }
-    .range-labels { display:flex; justify-content:space-between; font-size:.78rem; color:#8a9ab5; margin-top:2px; }
+    /* progress */
+    .wiz-progress { margin-bottom: 26px; }
+    .wiz-progress-meta { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; font-size:.82rem; color: var(--muted); font-weight:600; }
+    .wiz-progress-meta strong { color: var(--teal-900); }
+    .wiz-bars { display:flex; gap:6px; }
+    .wiz-bars span { flex:1; height:6px; border-radius:99px; background:#e7ebf0; transition: background .3s; }
+    .wiz-bars span.done { background: var(--teal-900); }
+    .wiz-bars span.now  { background: var(--accent); }
 
-    .calc-btn {
-      width: 100%;
-      padding: 14px;
-      background: #e85c1a;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-      margin-top: 8px;
-      font-family: inherit;
-    }
-    .calc-btn:hover { background: #cf4f16; }
-    .calc-btn:active { transform: scale(.98); }
+    /* steps */
+    .wiz-step { display:none; }
+    .wiz-step.active { display:block; animation: wizIn .28s ease both; }
+    @keyframes wizIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+    .wiz-title { font-size: clamp(1.35rem, 3vw, 1.75rem); color: var(--teal-900); margin-bottom: 6px; outline: none; }
+    .wiz-sub { color: var(--muted); font-size: .95rem; margin-bottom: 22px; }
 
-    /* Results panel */
-    .result-panel {
-      background: #f0f5ff;
-      border: 2px solid #1a6ed8;
-      border-radius: 16px;
-      padding: 28px;
-      display: none;
-    }
-    .result-panel.show { display: block; }
-    .result-panel h3 { font-size: 1rem; color: #1a6ed8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+    /* service tiles */
+    .svc-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .svc-tile { position:relative; display:flex; flex-direction:column; gap:8px; padding:16px; min-height:132px; border:1.5px solid var(--line); border-radius:16px; background:#fff; cursor:pointer; transition: border-color .15s, box-shadow .15s, background .15s, transform .1s; }
+    .svc-tile:hover { border-color: var(--accent-soft); box-shadow: var(--shadow-sm); }
+    .svc-tile input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+    .svc-tile:has(input:focus-visible) { outline: 3px solid rgba(var(--accent-rgb), .45); outline-offset: 2px; }
+    .svc-tile:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); box-shadow: 0 0 0 1px var(--accent) inset; }
+    .svc-tile:has(input:checked)::after { content:"✓"; position:absolute; top:10px; right:10px; width:22px; height:22px; border-radius:50%; background: var(--accent); color:#fff; font-size:.8rem; font-weight:800; display:flex; align-items:center; justify-content:center; }
+    .svc-ic { width:40px; height:40px; border-radius:12px; background:#eef2f8; color: var(--teal-900); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .svc-tile:has(input:checked) .svc-ic { background:#fff; color: var(--accent-dark); }
+    .svc-ic svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .svc-name { font-weight:700; font-size:.95rem; color: var(--teal-900); line-height:1.25; }
+    .svc-hint { font-size:.78rem; color: var(--muted); line-height:1.35; }
 
-    .result-range {
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 800;
-      color: #0d1f3c;
-      line-height: 1.1;
-      margin-bottom: 4px;
+    /* size */
+    .size-readout { text-align:center; margin: 6px 0 14px; }
+    .size-readout .big { font-size: clamp(2.4rem, 8vw, 3.4rem); font-weight: 800; color: var(--teal-900); letter-spacing:-.03em; line-height:1; }
+    .size-readout .unit { color: var(--muted); font-weight:600; margin-left:6px; }
+    .wiz input[type="range"] { width:100%; height: 32px; accent-color: var(--accent); cursor:pointer; }
+    .range-ends { display:flex; justify-content:space-between; font-size:.78rem; color:#98a2b3; margin-top:-4px; }
+    .chip-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0 4px; }
+    .chip { border:1.5px solid var(--line); background:#fff; color: var(--teal-900); border-radius:999px; padding:9px 16px; min-height:44px; font:inherit; font-weight:600; font-size:.9rem; cursor:pointer; transition: all .15s; }
+    .chip:hover { border-color: var(--accent-soft); }
+    .chip[aria-pressed="true"] { background: var(--teal-900); border-color: var(--teal-900); color:#fff; }
+    .num-wrap { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px; font-size:.88rem; color: var(--muted); }
+    .num-wrap input { width:130px; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-weight:700; text-align:center; color: var(--teal-900); }
+    .help-note { margin-top:16px; padding:12px 14px; background: var(--cream); border-radius:12px; font-size:.85rem; color: var(--ink-soft); }
+
+    /* stepper (fans) */
+    .qty { display:flex; align-items:center; justify-content:center; gap:22px; margin: 10px 0; }
+    .qty button { width:56px; height:56px; border-radius:50%; border:1.5px solid var(--line); background:#fff; font-size:1.6rem; font-weight:700; color: var(--teal-900); cursor:pointer; }
+    .qty button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-dark); }
+    .qty button:disabled { opacity:.35; cursor:not-allowed; }
+    .qty .big { font-size:3rem; font-weight:800; color: var(--teal-900); min-width:64px; text-align:center; line-height:1; }
+
+    /* option groups */
+    .opt-group { margin-bottom: 22px; }
+    .opt-group > label, .opt-group > .lbl { display:block; font-weight:700; color: var(--teal-900); font-size:.95rem; margin-bottom:10px; }
+    .opt-group .lbl small { font-weight:500; color: var(--muted); }
+    .opts { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+    .opt { position:relative; display:block; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; min-height:56px; cursor:pointer; background:#fff; transition: border-color .15s, background .15s; }
+    .opt input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+    .opt:hover { border-color: var(--accent-soft); }
+    .opt:has(input:focus-visible) { outline:3px solid rgba(var(--accent-rgb), .45); outline-offset:2px; }
+    .opt:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); box-shadow: 0 0 0 1px var(--accent) inset; }
+    .opt b { display:block; font-size:.92rem; color: var(--teal-900); }
+    .opt span { display:block; font-size:.78rem; color: var(--muted); margin-top:2px; line-height:1.3; }
+
+    /* contact step */
+    .lock-card { display:flex; gap:14px; align-items:center; background: linear-gradient(135deg, #0d1f3c, #1a3358); color:#fff; border-radius:16px; padding:16px 18px; margin-bottom:22px; }
+    .lock-card .lk { width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .lock-card .lk svg { width:22px; height:22px; fill:none; stroke:#fff; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .lock-card strong { display:block; font-size:1rem; }
+    .lock-card small { opacity:.82; font-size:.82rem; }
+    .lock-card .blur { filter: blur(6px); user-select:none; font-weight:800; }
+    .fields { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-weight:600; font-size:.85rem; color: var(--teal-900); }
+    .field label em { font-style:normal; color: var(--accent-dark); }
+    .field label small { font-weight:500; color: var(--muted); }
+    .field input { padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; font:inherit; font-size:1rem; color: var(--ink); background:#fbfcfd; min-height:50px; transition: border-color .15s, box-shadow .15s; }
+    .field input:focus { outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .18); background:#fff; }
+    .field input[aria-invalid="true"] { border-color:#d92d20; }
+    .field .err { color:#b42318; font-size:.8rem; min-height:0; }
+    .form-error { display:none; background:#fef3f2; border:1px solid #fecdca; color:#b42318; border-radius:12px; padding:12px 14px; font-size:.88rem; margin-top:14px; }
+    .form-error button { background:none; border:none; padding:0; font:inherit; font-weight:700; color:#b42318; text-decoration:underline; cursor:pointer; }
+    .privacy { font-size:.78rem; color: var(--muted); margin-top:12px; line-height:1.5; }
+
+    /* nav buttons */
+    .wiz-nav { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:28px; }
+    .btn-next, .btn-cta { background: var(--accent); color:#fff; border:none; border-radius:999px; padding:0 30px; min-height:54px; font:inherit; font-weight:800; font-size:1rem; cursor:pointer; transition: background .15s, transform .1s, box-shadow .15s; box-shadow: 0 10px 24px rgba(var(--accent-rgb), .32); display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+    .btn-next:hover:not(:disabled), .btn-cta:hover { background: var(--accent-dark); }
+    .btn-next:active:not(:disabled) { transform: scale(.98); }
+    .btn-next:disabled { background:#d0d5dd; box-shadow:none; cursor:not-allowed; }
+    .btn-next.full { width:100%; }
+    .btn-back { background:none; border:none; font:inherit; font-weight:700; color: var(--ink-soft); cursor:pointer; padding:12px 6px; min-height:44px; }
+    .btn-back:hover { color: var(--teal-900); text-decoration: underline; }
+    .btn-ghost { background:#fff; color: var(--teal-900); border:1.5px solid var(--line); border-radius:999px; padding:0 24px; min-height:50px; font:inherit; font-weight:700; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+    .btn-ghost:hover { border-color: var(--teal-900); }
+    .wiz button:focus-visible, .wiz a:focus-visible { outline:3px solid rgba(var(--accent-rgb), .55); outline-offset:2px; }
+
+    /* result */
+    .res-ok { display:flex; gap:10px; align-items:flex-start; background:#ecfdf3; border:1px solid #abefc6; color:#067647; border-radius:14px; padding:12px 14px; font-size:.88rem; margin-bottom:20px; }
+    .res-ok svg { width:20px; height:20px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; margin-top:1px; }
+    .res-box { text-align:center; background: var(--cream); border-radius:20px; padding:26px 18px; margin-bottom:20px; }
+    .res-label { font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color: var(--accent-dark); }
+    .res-range { font-size: clamp(2rem, 7vw, 3rem); font-weight:800; color: var(--teal-900); letter-spacing:-.03em; line-height:1.1; margin:6px 0; }
+    .res-note { color: var(--muted); font-size:.88rem; }
+    .res-table { width:100%; border-collapse:collapse; font-size:.9rem; margin-bottom:22px; }
+    .res-table td { padding:10px 0; border-bottom:1px solid var(--line); color: var(--ink-soft); }
+    .res-table td:last-child { text-align:right; font-weight:700; color: var(--teal-900); }
+    .next-steps { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:24px; }
+    .next-steps div { background:#f8fafc; border-radius:14px; padding:14px; font-size:.84rem; color: var(--ink-soft); }
+    .next-steps b { display:block; color: var(--teal-900); margin-bottom:2px; font-size:.9rem; }
+    .next-steps i { font-style:normal; display:inline-flex; width:24px; height:24px; border-radius:50%; background: var(--teal-900); color:#fff; font-weight:800; font-size:.78rem; align-items:center; justify-content:center; margin-bottom:8px; }
+    .res-actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+    .trust-row { display:flex; flex-wrap:wrap; gap:8px 22px; justify-content:center; margin-top:18px; font-size:.82rem; color: var(--muted); font-weight:600; }
+    .trust-row span::before { content:"✓ "; color:#12b76a; font-weight:800; }
+
+    @media (max-width: 720px) {
+      .svc-grid { grid-template-columns: 1fr 1fr; }
+      .fields { grid-template-columns: 1fr; }
+      .next-steps { grid-template-columns: 1fr; }
     }
-    .result-note { font-size:.85rem; color:#5a6a85; margin-bottom: 20px; }
-    .result-breakdown { border-top: 1px solid #d0d8f0; padding-top: 16px; margin-bottom: 20px; }
-    .result-breakdown table { width:100%; border-collapse:collapse; font-size:.88rem; }
-    .result-breakdown td { padding: 5px 0; color:#334; }
-    .result-breakdown td:last-child { text-align:right; font-weight:600; color:#0d1f3c; }
-    .result-cta {
-      display:block; text-align:center;
-      background:#e85c1a; color:#fff; font-weight:700; font-size:.95rem;
-      padding:13px; border-radius:8px; text-decoration:none;
-      transition: background .2s;
+    @media (max-width: 480px) {
+      .calc-hero { padding: 40px 0 92px; }
+      .svc-grid { grid-template-columns: 1fr; }
+      .svc-tile { flex-direction:row; align-items:center; min-height:0; padding:14px; }
+      .svc-tile:has(input:checked)::after { top:50%; transform:translateY(-50%); }
+      .wiz-nav { flex-direction: column-reverse; align-items: stretch; }
+      .wiz-nav .btn-next { width:100%; }
+      .btn-back { align-self:center; }
     }
-    .result-cta:hover { background:#cf4f16; }
+    @media (prefers-reduced-motion: reduce) {
+      .wiz-step.active { animation:none; }
+      * { transition: none !important; }
+    }
 
     /* Pricing reference table */
     .pricing-table-section { background: #f8fafd; padding: 56px 0; }
@@ -315,23 +357,22 @@
         <div class="nav-mobile-header"><a class="brand" href="/" aria-label="Insulation Contractor Houston home" style="box-shadow:none;"><img src="/assets/images/logo-header.webp" alt="Insulation Contractor Houston" class="brand-logo" width="440" height="100" /></a><button class="nav-close" type="button" aria-label="Close menu"><span></span><span></span></button></div>
         <a href="/">Home</a>
         <span class="nav-dd">
-          <a href="#">Services <span class="nav-dd-caret">+</span></a>
-          <div class="nav-dd-panel">
-            <a href="/spray-foam-insulation">Spray Foam Insulation</a><a href="/injection-foam-insulation">Injection Foam Insulation</a><a href="/blown-in-insulation">Blown In Insulation</a><a href="/attic-fan-installation">Attic Fan Installation</a><a href="/insulation-removal">Insulation Removal</a><a href="/commercial-insulation">Commercial Insulation</a>
-          </div>
-        </span>
-        <span class="nav-dd">
-          <a href="#">Locations <span class="nav-dd-caret">+</span></a>
-          <div class="nav-dd-panel">
+        <a href="#" role="button" aria-haspopup="true">Services <span class="nav-dd-caret">+</span></a>
+        <div class="nav-dd-panel">
+              <a href="/spray-foam-insulation">Spray Foam Insulation</a><a href="/injection-foam-insulation">Injection Foam Insulation</a><a href="/blown-in-insulation">Blown In Insulation</a><a href="/attic-fan-installation">Attic Fan Installation</a><a href="/insulation-removal">Insulation Removal</a><a href="/commercial-insulation">Commercial Insulation</a>
 
-            <a href="/cypress-tx-insulation">Cypress, TX</a>
-            <a href="/cypress-tx-insulation">Cypress, TX</a>
+        </div>
+      </span>
+        <span class="nav-dd">
+        <a href="#" role="button" aria-haspopup="true">Locations <span class="nav-dd-caret">+</span></a>
+        <div class="nav-dd-panel">
+          <a href="/cypress-tx-insulation">Cypress, TX</a>
           <a href="/spring-tx-insulation">Spring, TX</a>
-            <a href="/conroe-tx-insulation">Conroe, TX</a>
-            <a href="/kingwood-tx-insulation">Kingwood, TX</a>
-            <a href="/the-woodlands-tx-insulation">The Woodlands, TX</a>
-            <a href="/humble-tx-insulation">Humble, TX</a>
-            <a href="/tomball-tx-insulation">Tomball, TX</a>
+          <a href="/conroe-tx-insulation">Conroe, TX</a>
+          <a href="/kingwood-tx-insulation">Kingwood, TX</a>
+          <a href="/the-woodlands-tx-insulation">The Woodlands, TX</a>
+          <a href="/humble-tx-insulation">Humble, TX</a>
+          <a href="/tomball-tx-insulation">Tomball, TX</a>
           </div>
         </span>
         <a href="/insulation-cost-calculator">Calculator</a>
@@ -347,131 +388,145 @@
   <!-- Hero -->
   <div class="calc-hero">
     <div class="shell">
-      <h1>Insulation Cost Calculator<br>Houston TX</h1>
-      <p>Enter your home details below for an instant price estimate. Free — no sign-up required. For a full service overview, visit our <a href="/">insulation contractor Houston</a> home page.</p>
+      <h1>Insulation Cost Calculator<br>Houston, TX</h1>
+      <p>Answer a few quick questions and get a realistic price range for your home. For a full service overview, visit our <a href="/">insulation contractor Houston</a> home page.</p>
       <div class="hero-badges">
-        <span class="badge">✓ Greater Houston Pricing</span>
-        <span class="badge">✓ All Insulation Types</span>
-        <span class="badge">✓ Instant Results</span>
+        <span class="badge">✓ Greater Houston pricing</span>
+        <span class="badge">✓ Takes about a minute</span>
+        <span class="badge">✓ No obligation</span>
       </div>
     </div>
   </div>
 
-  <!-- Calculator + Result -->
-  <section class="calc-section">
+  <!-- Multi-step calculator -->
+  <section class="calc-section" aria-labelledby="calcHeading">
     <div class="shell">
-      <nav class="breadcrumbs" aria-label="Breadcrumb" style="margin-bottom:28px;"><a href="/">Home</a><span>/</span><strong>Insulation Cost Calculator</strong></nav>
-      <div class="calc-grid">
+      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><strong>Insulation Cost Calculator</strong></nav>
 
-        <!-- Left: Form -->
-        <div class="calc-card">
-          <h2>Tell us about your project</h2>
+      <div class="wiz" id="wiz">
+        <h2 id="calcHeading" class="sr-only">Insulation cost estimator</h2>
+        <div class="wiz-card">
 
-          <div class="form-group">
-            <label for="insType">Insulation type</label>
-            <select id="insType">
-              <option value="blown-in">Blown-In (Attic)</option>
-              <option value="spray-open">Spray Foam — Open Cell</option>
-              <option value="spray-closed">Spray Foam — Closed Cell</option>
-              <option value="injection">Injection Foam (Walls)</option>
-              <option value="removal">Insulation Removal Only</option>
-              <option value="removal-replace">Removal + Re-Insulate</option>
-            </select>
+          <div class="wiz-progress" id="wizProgress" aria-hidden="false">
+            <div class="wiz-progress-meta"><span id="wizStepText"><strong>Step 1</strong> of 4</span><span id="wizStepName">Service</span></div>
+            <div class="wiz-bars" id="wizBars"></div>
           </div>
 
-          <div class="form-group">
-            <label for="sqft">Attic / area square footage <span>(sq ft)</span></label>
-            <div class="range-wrap">
-              <input type="range" id="sqftRange" min="400" max="4000" step="100" value="1500" oninput="syncRange('sqft','sqftRange',this.value)">
-              <div class="range-labels"><span>400</span><span>4,000</span></div>
+          <!-- Step: service -->
+          <div class="wiz-step" id="step-service" data-step="service">
+            <h3 class="wiz-title" tabindex="-1">What do you need done?</h3>
+            <p class="wiz-sub">Pick the closest match. You can always change it before your estimate.</p>
+            <div class="svc-grid" id="svcGrid" role="radiogroup" aria-label="Service"></div>
+            <div class="wiz-nav"><span></span><button type="button" class="btn-next" id="svcNext" disabled>Continue &rarr;</button></div>
+          </div>
+
+          <!-- Step: size -->
+          <div class="wiz-step" id="step-size" data-step="size">
+            <h3 class="wiz-title" tabindex="-1" id="sizeTitle">How big is the area?</h3>
+            <p class="wiz-sub" id="sizeSub"></p>
+            <div id="sizeArea">
+              <div class="size-readout"><span class="big" id="sizeBig">1,500</span><span class="unit" id="sizeUnit">sq ft</span></div>
+              <input type="range" id="sizeRange" aria-label="Square footage">
+              <div class="range-ends"><span id="sizeMin"></span><span id="sizeMax"></span></div>
+              <div class="chip-row" id="sizeChips"></div>
+              <div class="num-wrap"><label for="sizeNum">Or type it:</label><input type="number" id="sizeNum" inputmode="numeric"><span id="sizeUnit2">sq ft</span></div>
+              <p class="help-note" id="sizeHelp"></p>
             </div>
-            <input type="number" id="sqft" min="200" max="6000" value="1500" placeholder="e.g. 1500" oninput="syncInput('sqft','sqftRange',this.value)" style="margin-top:8px;">
+            <div id="qtyArea" style="display:none;">
+              <div class="qty">
+                <button type="button" id="qtyMinus" aria-label="Fewer fans">&minus;</button>
+                <div class="big" id="qtyBig" aria-live="polite">1</div>
+                <button type="button" id="qtyPlus" aria-label="More fans">+</button>
+              </div>
+              <p class="help-note">Most attics under 1,500 sq ft need one fan. Larger attics often need two. We confirm during your free inspection.</p>
+            </div>
+            <div class="wiz-nav"><button type="button" class="btn-back" data-back>&larr; Back</button><button type="button" class="btn-next" data-next>Continue &rarr;</button></div>
           </div>
 
-          <div class="form-group" id="rGroup">
-            <label for="currentR">Current R-value <span>(enter 0 if unknown / none)</span></label>
-            <select id="currentR">
-              <option value="0">0 — No insulation / unknown</option>
-              <option value="11">R-11 (2–3 inches)</option>
-              <option value="19">R-19 (5–6 inches)</option>
-              <option value="30">R-30 (8–9 inches) — already decent</option>
-              <option value="38">R-38 — already at DOE minimum</option>
-            </select>
+          <!-- Step: details -->
+          <div class="wiz-step" id="step-details" data-step="details">
+            <h3 class="wiz-title" tabindex="-1">A few details about your attic</h3>
+            <p class="wiz-sub">Rough answers are fine. We verify everything on your free inspection.</p>
+            <div class="opt-group" id="grpCurrent">
+              <span class="lbl">How much insulation is there now? <small>(your best guess)</small></span>
+              <div class="opts" role="radiogroup" aria-label="Current insulation">
+                <label class="opt"><input type="radio" name="currentR" value="0"><b>None / not sure</b><span>Bare floor or can't tell</span></label>
+                <label class="opt"><input type="radio" name="currentR" value="11"><b>Thin</b><span>About 2–3 inches (R-11)</span></label>
+                <label class="opt"><input type="radio" name="currentR" value="19" checked><b>Some</b><span>About 5–6 inches (R-19)</span></label>
+                <label class="opt"><input type="radio" name="currentR" value="30"><b>Fairly deep</b><span>About 8–9 inches (R-30)</span></label>
+              </div>
+            </div>
+            <div class="opt-group" id="grpTarget">
+              <span class="lbl">Target level</span>
+              <div class="opts" role="radiogroup" aria-label="Target R-value">
+                <label class="opt"><input type="radio" name="targetR" value="30"><b>R-30</b><span>Budget upgrade</span></label>
+                <label class="opt"><input type="radio" name="targetR" value="38" checked><b>R-38</b><span>Common retrofit target</span></label>
+                <label class="opt"><input type="radio" name="targetR" value="49"><b>R-49</b><span>Higher performance (+$0.25/sq ft)</span></label>
+                <label class="opt"><input type="radio" name="targetR" value="60"><b>R-60</b><span>Maximum (+$0.50/sq ft)</span></label>
+              </div>
+            </div>
+            <div class="opt-group" id="grpAccess">
+              <span class="lbl">How easy is it to get around the attic?</span>
+              <div class="opts" role="radiogroup" aria-label="Attic access">
+                <label class="opt"><input type="radio" name="access" value="easy"><b>Easy</b><span>Good headroom, standard hatch</span></label>
+                <label class="opt"><input type="radio" name="access" value="moderate" checked><b>Moderate</b><span>Some low or tight areas</span></label>
+                <label class="opt"><input type="radio" name="access" value="difficult"><b>Difficult</b><span>Crawl space or obstructions</span></label>
+              </div>
+            </div>
+            <div class="wiz-nav"><button type="button" class="btn-back" data-back>&larr; Back</button><button type="button" class="btn-next" data-next>Continue &rarr;</button></div>
           </div>
 
-          <div class="form-group" id="targetRGroup">
-            <label for="targetR">Target R-value</label>
-            <select id="targetR">
-              <option value="30">R-30 (older homes, budget upgrade)</option>
-              <option value="38" selected>R-38 (DOE minimum for Houston)</option>
-              <option value="49">R-49 (high performance)</option>
-              <option value="60">R-60 (maximum / new build)</option>
-            </select>
+          <!-- Step: contact (lead capture) -->
+          <div class="wiz-step" id="step-contact" data-step="contact">
+            <h3 class="wiz-title" tabindex="-1">Your estimate is ready</h3>
+            <p class="wiz-sub">Tell us where to send it. A local team member will confirm the details on a free inspection.</p>
+            <div class="lock-card" aria-hidden="true">
+              <div class="lk"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+              <div><strong class="blur">$0,000 – $0,000</strong><small id="lockSummary">Your estimate</small></div>
+            </div>
+            <form id="leadForm" novalidate>
+              <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
+              <div class="fields">
+                <div class="field"><label for="fName">Your name <em>*</em></label><input type="text" id="fName" name="name" autocomplete="name" placeholder="First &amp; last name" aria-describedby="eName"><span class="err" id="eName" role="alert"></span></div>
+                <div class="field"><label for="fPhone">Phone <em>*</em></label><input type="tel" id="fPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="(832) 000-0000" aria-describedby="ePhone"><span class="err" id="ePhone" role="alert"></span></div>
+                <div class="field"><label for="fZip">ZIP code <em>*</em></label><input type="text" id="fZip" name="zip" autocomplete="postal-code" inputmode="numeric" maxlength="5" placeholder="77429" aria-describedby="eZip"><span class="err" id="eZip" role="alert"></span></div>
+                <div class="field"><label for="fEmail">Email <small>(optional)</small></label><input type="email" id="fEmail" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="eEmail"><span class="err" id="eEmail" role="alert"></span></div>
+              </div>
+              <div class="form-error" id="formError" role="alert"></div>
+              <div class="wiz-nav">
+                <button type="button" class="btn-back" data-back>&larr; Back</button>
+                <button type="submit" class="btn-next" id="leadSubmit">See My Estimate &rarr;</button>
+              </div>
+              <p class="privacy">By continuing you agree that Insulation Contractor Houston may call or text you about your estimate. No spam, no obligation. See our <a href="/privacy-policy" style="text-decoration:underline;">privacy policy</a>.</p>
+            </form>
           </div>
 
-          <div class="form-group">
-            <label for="access">Attic access <span>(affects labor)</span></label>
-            <select id="access">
-              <option value="easy">Easy — good headroom, standard hatch</option>
-              <option value="moderate" selected>Moderate — some low areas</option>
-              <option value="difficult">Difficult — crawl space or obstructions</option>
-            </select>
+          <!-- Step: result -->
+          <div class="wiz-step" id="step-result" data-step="result">
+            <div class="res-ok" id="resOk"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div><b>Request received.</b> We'll call you within 1 business day to confirm your free inspection time.</div></div>
+            <h3 class="wiz-title" tabindex="-1">Your estimated cost</h3>
+            <div class="res-box">
+              <div class="res-label">Typical Greater Houston range</div>
+              <div class="res-range" id="resRange">—</div>
+              <div class="res-note" id="resNote"></div>
+            </div>
+            <table class="res-table" id="resTable"></table>
+            <div class="next-steps">
+              <div><i>1</i><b>We call you</b>To confirm your details and pick a time.</div>
+              <div><i>2</i><b>Free inspection</b>We measure, check for damage and air leaks.</div>
+              <div><i>3</i><b>Written quote</b>Itemized price before any work begins.</div>
+            </div>
+            <div class="res-actions">
+              <a class="btn-cta" href="tel:+18322912738">Call (832) 291-2738</a>
+              <button type="button" class="btn-ghost" id="restart">Start a new estimate</button>
+            </div>
+            <div class="trust-row"><span>Free in-home inspection</span><span>Written estimate before work</span><span>Fully insured contractor</span></div>
           </div>
 
-          <button class="calc-btn" onclick="calculate()">Calculate My Estimate</button>
         </div>
-
-        <!-- Right: Result -->
-        <div>
-          <div class="calc-card" id="resultPanel" style="display:none;">
-            <h3 style="font-size:1rem;color:#1a6ed8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Your Estimate</h3>
-            <div class="result-range" id="resultRange">—</div>
-            <div class="result-note" id="resultNote"></div>
-            <div class="result-breakdown">
-              <table id="breakdownTable"></table>
-            </div>
-            <!-- Lead capture form -->
-            <div id="leadFormWrap">
-              <p style="font-size:.88rem;color:#334;margin-bottom:14px;font-weight:600;">Get a precise quote — enter your details and we'll be in touch:</p>
-              <form id="leadForm" novalidate>
-                <input type="text" name="_hp" style="display:none;" tabindex="-1" autocomplete="off">
-                <div class="form-group" style="margin-bottom:12px;">
-                  <label for="leadName" style="font-size:.82rem;margin-bottom:4px;">Your name <span style="color:#e85c1a;">*</span></label>
-                  <input type="text" id="leadName" name="name" placeholder="First &amp; last name" required style="padding:10px 12px;">
-                </div>
-                <div class="form-group" style="margin-bottom:12px;">
-                  <label for="leadPhone" style="font-size:.82rem;margin-bottom:4px;">Phone number <span style="color:#e85c1a;">*</span></label>
-                  <input type="tel" id="leadPhone" name="phone" placeholder="(832) 000-0000" required style="padding:10px 12px;">
-                </div>
-                <div class="form-group" style="margin-bottom:16px;">
-                  <label for="leadEmail" style="font-size:.82rem;margin-bottom:4px;">Email <span style="color:#8a9ab5;">(optional)</span></label>
-                  <input type="email" id="leadEmail" name="email" placeholder="you@example.com" style="padding:10px 12px;">
-                </div>
-                <div id="leadError" style="display:none;color:#c0440e;font-size:.82rem;margin-bottom:10px;"></div>
-                <button type="submit" class="calc-btn" id="leadSubmitBtn" style="margin-top:0;">Send My Estimate Request &rarr;</button>
-                <p style="font-size:.75rem;color:#8a9ab5;margin-top:8px;text-align:center;">No commitment · We'll call to confirm · Mon–Sat 8am–6pm</p>
-              </form>
-            </div>
-            <!-- Success state (shown after submit) -->
-            <div id="leadSuccess" style="display:none;text-align:center;padding:12px 0;">
-              <div style="font-size:2rem;margin-bottom:8px;">✅</div>
-              <p style="font-weight:700;color:#0d1f3c;margin-bottom:4px;">We've got your request!</p>
-              <p style="font-size:.88rem;color:#5a6a85;">Insulation Contractor Houston will call you within 1 business day to confirm your free inspection time.</p>
-            </div>
-          </div>
-
-          <!-- Placeholder shown before calculating -->
-          <div class="calc-card" id="placeholderPanel" style="text-align:center;padding:40px 28px;">
-            <div style="font-size:3rem;margin-bottom:12px;">🧮</div>
-            <h3 style="color:#0d1f3c;margin-bottom:8px;">Fill in your details</h3>
-            <p style="color:#5a6a85;font-size:.9rem;line-height:1.6;">Select your insulation type, enter your square footage, and click <strong>Calculate</strong> to see your instant estimate.</p>
-            <p style="color:#5a6a85;font-size:.85rem;margin-top:12px;">Need help figuring out your attic size? The square footage of your ground floor is a close approximation of your attic floor area.</p>
-          </div>
-        </div>
-
       </div>
 
-      <div class="disclaimer">
+      <div class="disclaimer" style="max-width:800px;margin-left:auto;margin-right:auto;">
         <strong>Disclaimer:</strong> These estimates are for budgeting purposes only and reflect typical Greater Houston market rates as of 2025–2026. Actual pricing depends on attic conditions, material costs, and site-specific factors discovered during inspection. Call <a href="tel:+18322912738">(832) 291-2738</a> for a binding written quote.
       </div>
     </div>
@@ -495,11 +550,11 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>Blown-In Fiberglass</strong></td>
+              <td><strong>Blown-In Attic Insulation</strong></td>
               <td>Attic top-off or full install</td>
               <td>R-38 to R-60</td>
-              <td>$1.00 – $2.50</td>
-              <td>$1,500 – $3,750</td>
+              <td>$1.00 – $1.50</td>
+              <td>$1,500 – $2,250</td>
             </tr>
             <tr>
               <td><strong>Open-Cell Spray Foam</strong></td>
@@ -512,15 +567,15 @@
               <td><strong>Closed-Cell Spray Foam</strong></td>
               <td>Roof deck, moisture barriers</td>
               <td>R-6.5/inch</td>
-              <td>$3.00 – $7.00</td>
-              <td>$4,500 – $10,500</td>
+              <td>$2.00 – $4.00</td>
+              <td>$3,000 – $6,000</td>
             </tr>
             <tr>
               <td><strong>Injection Foam (Walls)</strong></td>
               <td>Existing wall cavities, no demo</td>
               <td>R-4.5/inch</td>
-              <td>$2.00 – $5.00</td>
-              <td>$3,000 – $7,500</td>
+              <td>$1.50 – $4.00</td>
+              <td>$2,250 – $6,000</td>
             </tr>
             <tr>
               <td><strong>Insulation Removal</strong></td>
@@ -533,19 +588,33 @@
               <td><strong>Removal + Blown-In Reinstall</strong></td>
               <td>Full attic refresh</td>
               <td>R-38 to R-49</td>
-              <td>$2.00 – $4.50</td>
-              <td>$3,000 – $6,750</td>
+              <td>$2.00 – $3.50</td>
+              <td>$3,000 – $5,250</td>
             </tr>
             <tr>
               <td><strong>Commercial Spray Foam (Metal Buildings)</strong></td>
               <td>Warehouses, metal shops</td>
               <td>R-19+</td>
-              <td>$2.50 – $6.00</td>
-              <td>Contact for quote</td>
+              <td>$1.50 – $3.50</td>
+              <td>Quoted by surface area</td>
+            </tr>
+            <tr>
+              <td><strong>Attic Air Sealing</strong></td>
+              <td>Gaps, penetrations, attic hatch</td>
+              <td>—</td>
+              <td>Flat price</td>
+              <td>$250 – $1,500</td>
+            </tr>
+            <tr>
+              <td><strong>Solar Attic Fan</strong></td>
+              <td>Venting heat from a vented attic</td>
+              <td>—</td>
+              <td>Per fan, installed</td>
+              <td>$600 – $1,600</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr><td colspan="5">Prices include materials and labor. Does not include drywall repair for injection foam or HVAC modifications. Texas sales tax may apply to materials.</td></tr>
+            <tr><td colspan="5">Prices include materials and labor. Spray foam is priced by thickness: open-cell at about 3.5–5.5 inches, closed-cell at about 2–3 inches. Injection foam is per square foot of wall area. Does not include drywall repair for injection foam or HVAC modifications. Texas sales tax may apply to materials. Ranges reflect typical Greater Houston pricing from published cost guides and homeowner-reported quotes, 2025–2026.</td></tr>
           </tfoot>
         </table>
       </div>
@@ -580,12 +649,12 @@
         <div class="factor-card">
           <div class="factor-icon">🗑️</div>
           <h3>Removal Needed?</h3>
-          <p>Old fiberglass batts or contaminated cellulose must be removed before spray foam. Removal typically adds $1–$2/sq ft to the total project cost.</p>
+          <p>Old batts or contaminated loose-fill insulation must be removed before spray foam. Removal typically adds $1–$2/sq ft to the total project cost.</p>
         </div>
         <div class="factor-card">
           <div class="factor-icon">💨</div>
           <h3>Air Sealing</h3>
-          <p>Spray foam naturally air-seals; blown-in does not. Adding air sealing (gaps around penetrations, top plates) improves performance and can add $300–$800 to a project.</p>
+          <p>Spray foam naturally air-seals; blown-in does not. Adding air sealing (gaps around penetrations, top plates) improves performance and typically adds $250–$1,500 to a project.</p>
         </div>
       </div>
     </div>
@@ -602,7 +671,7 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a">
-            Insulation costs in Houston typically range from <strong>$1.00–$2.50 per square foot</strong> for blown-in attic insulation, <strong>$1.50–$3.50</strong> for open-cell spray foam, and <strong>$3.00–$7.00</strong> for closed-cell spray foam. A 1,500 sq ft attic with blown-in to R-38 runs approximately $1,500–$3,750. Prices depend on current insulation level, target R-value, attic access, and whether removal is needed.
+            Insulation costs in Houston typically range from <strong>$1.00–$1.50 per square foot</strong> for blown-in attic insulation, <strong>$1.50–$3.50</strong> for open-cell spray foam, and <strong>$2.00–$4.00</strong> for closed-cell spray foam, depending on foam thickness. A 1,500 sq ft attic with blown-in to R-38 runs approximately $1,500–$2,250. Removing old insulation adds $1.00–$2.00 per square foot, attic air sealing is typically $250–$1,500, and a solar attic fan runs about $600–$1,600 installed. Prices depend on current insulation level, target R-value, attic access, and whether removal is needed.
           </div>
         </div>
         <div class="faq-item">
@@ -638,7 +707,7 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a">
-            Yes. The federal <strong>Energy Efficient Home Improvement Credit (25C)</strong> allows homeowners to claim 30% of insulation material costs (not labor) up to $1,200 per year through 2032. Some CenterPoint Energy and Oncor programs also offer rebates for qualifying insulation upgrades. Ask us for documentation after your project and consult a tax professional for eligibility.
+            The federal <strong>Energy Efficient Home Improvement Credit (25C)</strong> ended for work completed after December 31, 2025, so it no longer applies to new projects. Some CenterPoint Energy and Oncor programs may still offer rebates for qualifying insulation upgrades; availability changes, so confirm with the utility. Ask us for documentation after your project and consult a tax professional for eligibility.
           </div>
         </div>
         <div class="faq-item">
@@ -674,14 +743,14 @@
       <div class="footer-brand">
         <a class="brand brand-light" href="/" aria-label="Insulation Contractor Houston home"><img src="/assets/images/logo-footer.webp" alt="Insulation Contractor Houston" class="brand-logo brand-logo-footer" width="440" height="100" /></a>
         <p>Professional attic, spray foam, and wall insulation services for homes throughout Greater Houston.</p>
+        <div class="social-links" data-social-links><a href="https://www.youtube.com/@InsulationContractorHouston" data-social="youtube" aria-label="YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81M9.55 15.57V8.43L15.82 12z"/></svg></a><a href="https://www.pinterest.com/usainsulationnorthhouston/" data-social="pinterest" aria-label="Pinterest"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.43 7.63 11.17-.11-.95-.2-2.4.04-3.44.22-.94 1.4-5.96 1.4-5.96s-.36-.72-.36-1.78c0-1.67.97-2.91 2.17-2.91 1.02 0 1.52.77 1.52 1.69 0 1.03-.66 2.57-1 4-.28 1.19.6 2.17 1.77 2.17 2.13 0 3.77-2.25 3.77-5.5 0-2.87-2.06-4.88-5.01-4.88-3.41 0-5.42 2.56-5.42 5.21 0 1.03.4 2.14.89 2.74.1.12.11.22.08.34l-.33 1.36c-.05.22-.17.27-.4.16-1.5-.7-2.44-2.89-2.44-4.65 0-3.79 2.75-7.27 7.93-7.27 4.16 0 7.4 2.97 7.4 6.93 0 4.14-2.61 7.47-6.23 7.47-1.22 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15C9.57 23.81 10.76 24 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0"/></svg></a></div>
       </div>
       <div>
         <h3>Services</h3>
-        <a href="/spray-foam-insulation">Spray Foam Insulation</a><a href="/injection-foam-insulation">Injection Foam Insulation</a><a href="/blown-in-insulation">Blown In Insulation</a><a href="/attic-fan-installation">Attic Fan Installation</a><a href="/insulation-removal">Insulation Removal</a><a href="/commercial-insulation">Commercial Insulation</a>
+          <a href="/spray-foam-insulation">Spray Foam Insulation</a><a href="/injection-foam-insulation">Injection Foam Insulation</a><a href="/blown-in-insulation">Blown In Insulation</a><a href="/attic-fan-installation">Attic Fan Installation</a><a href="/insulation-removal">Insulation Removal</a><a href="/commercial-insulation">Commercial Insulation</a>
       </div>
       <div>
         <h3>Locations</h3>
-
         <a href="/cypress-tx-insulation">Cypress, TX</a>
         <a href="/spring-tx-insulation">Spring, TX</a>
         <a href="/conroe-tx-insulation">Conroe, TX</a>
@@ -690,7 +759,7 @@
         <a href="/humble-tx-insulation">Humble, TX</a>
         <a href="/tomball-tx-insulation">Tomball, TX</a>
       </div>
-            <div>
+      <div>
         <h3>Contact</h3>
         <a href="/about">Our story</a>
         <a href="/blog">Blog</a>
@@ -706,152 +775,329 @@
     <div class="shell footer-bottom">
       <span>&copy; 2026 Insulation Contractor Houston</span>
       <div><a href="/privacy-policy">Privacy Policy</a> &middot; <a href="/terms-of-service">Terms of Service</a> &middot; <a href="/contact">Contact</a></div>
-      <span>Fully insured contractor</span>
+      <span>Licensed &amp; insured</span>
     </div>
   </footer>
 </div>
 
 <script>
-  /* ── Range / number sync ── */
-  function syncRange(numId, rangeId, val) {
-    document.getElementById(rangeId).value = val;
-  }
-  function syncInput(numId, rangeId, val) {
-    document.getElementById(rangeId).value = val;
-  }
-
-  /* ── Pricing model ── */
-  const RATES = {
-    'blown-in':       { low: 1.00, high: 2.50, label: 'Blown-In Attic Insulation' },
-    'spray-open':     { low: 1.50, high: 3.50, label: 'Open-Cell Spray Foam' },
-    'spray-closed':   { low: 3.00, high: 7.00, label: 'Closed-Cell Spray Foam' },
-    'injection':      { low: 2.00, high: 5.00, label: 'Injection Foam (Walls)' },
-    'removal':        { low: 1.00, high: 2.00, label: 'Insulation Removal' },
-    'removal-replace':{ low: 2.00, high: 4.50, label: 'Removal + Re-Insulate' },
+  /* ── Multi-step estimator ──
+     Prices: verified Greater Houston ranges (2025–2026). Keep in sync with the
+     pricing table below and with the service pages. */
+  const IC = {
+    layers:   '<path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+    trash:    '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    refresh:  '<path d="M20 11a8 8 0 0 0-14-4L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14 4l2-2"/><path d="M20 20v-5h-5"/>',
+    cloud:    '<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9H7z"/>',
+    cube:     '<path d="M12 3 4 7v10l8 4 8-4V7l-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/>',
+    wall:     '<rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9.3h18M3 14.7h18M9 4v5.3M15 9.3v5.4M9 14.7V20"/>',
+    wind:     '<path d="M3 8h10a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/>',
+    sun:      '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    building: '<path d="M3 21V9l9-5 9 5v12"/><path d="M3 21h18M8 21v-6h8v6M8 12h.01M12 12h.01M16 12h.01"/>'
   };
-  const ACCESS_MULT = { easy: 0.90, moderate: 1.00, difficult: 1.20 };
 
-  function rValueMultiplier(currentR, targetR, type) {
-    if (type === 'removal' || type === 'spray-open' || type === 'spray-closed' || type === 'injection') return 1.0;
-    const gap = Math.max(0, parseInt(targetR) - parseInt(currentR));
-    if (gap <= 0) return 0.25; // top-off only
-    if (gap <= 19) return 0.65;
-    if (gap <= 30) return 0.85;
-    return 1.0;
+  const ATTIC_SIZE = { min: 400, max: 4000, step: 100, def: 1500, chips: [1000, 1500, 2000, 2500, 3000], unit: 'sq ft',
+    title: 'How big is your attic?', sub: 'Approximate attic floor area is fine.',
+    help: "Not sure? The square footage of your ground floor is a close estimate of your attic floor area." };
+
+  const SERVICES = [
+    { id: 'blown-in',        title: 'Blown-in attic insulation', hint: "Add depth over what's there", price: '$1.00–$1.50 / sq ft', icon: 'layers',  kind: 'sqft', low: 1.00, high: 1.50, size: ATTIC_SIZE, current: true,  target: true,  access: true,  label: 'Blown-In Attic Insulation' },
+    { id: 'removal',         title: 'Insulation removal',        hint: 'Clean out old or damaged material', price: '$1.00–$2.00 / sq ft', icon: 'trash',   kind: 'sqft', low: 1.00, high: 2.00, size: ATTIC_SIZE, access: true, label: 'Insulation Removal' },
+    { id: 'removal-replace', title: 'Removal + new insulation',  hint: 'Full attic refresh', price: '$2.00–$3.50 / sq ft', icon: 'refresh', kind: 'sqft', low: 2.00, high: 3.50, size: ATTIC_SIZE, current: true, target: true, access: true, label: 'Removal + Re-Insulate' },
+    { id: 'spray-open',      title: 'Open-cell spray foam',      hint: 'Roof deck or interior walls', price: '$1.50–$3.50 / sq ft', icon: 'cloud',   kind: 'sqft', low: 1.50, high: 3.50, size: Object.assign({}, ATTIC_SIZE, { help: 'Spray foam covers the roof deck, which is larger than the attic floor. Enter your attic floor size and we refine it on your inspection.' }), access: true, label: 'Open-Cell Spray Foam' },
+    { id: 'spray-closed',    title: 'Closed-cell spray foam',    hint: 'Moisture barrier, roof decks', price: '$2.00–$4.00 / sq ft', icon: 'cube',    kind: 'sqft', low: 2.00, high: 4.00, size: Object.assign({}, ATTIC_SIZE, { help: 'Spray foam covers the roof deck, which is larger than the attic floor. Enter your attic floor size and we refine it on your inspection.' }), access: true, label: 'Closed-Cell Spray Foam' },
+    { id: 'injection',       title: 'Injection foam (walls)',    hint: 'Insulate walls, no drywall removal', price: '$1.50–$4.00 / sq ft of wall', icon: 'wall', kind: 'sqft', low: 1.50, high: 4.00, label: 'Injection Foam (Walls)',
+      size: { min: 200, max: 5000, step: 100, def: 1800, chips: [600, 1200, 1800, 2400, 3200], unit: 'sq ft of wall', title: 'How much wall area?', sub: 'Exterior wall area you want insulated.', help: 'Most single-story homes have roughly 1,200–1,800 sq ft of exterior wall. We measure exactly on your inspection.' } },
+    { id: 'air-seal',        title: 'Attic air sealing',         hint: 'Stop leaks before insulating', price: '$250–$1,500 flat', icon: 'wind',    kind: 'flat', low: 250, high: 1500, size: ATTIC_SIZE, label: 'Attic Air Sealing' },
+    { id: 'solar-fan',       title: 'Solar attic fan',           hint: 'Vent heat out of the attic', price: '$600–$1,600 per fan', icon: 'sun',     kind: 'fan', low: 600, high: 1600, addLow: 300, addHigh: 600, label: 'Solar Attic Fan' },
+    { id: 'commercial',      title: 'Commercial spray foam',     hint: 'Metal buildings, warehouses', price: '$1.50–$3.50 / sq ft', icon: 'building', kind: 'sqft', low: 1.50, high: 3.50, label: 'Commercial Spray Foam',
+      size: { min: 1000, max: 50000, step: 500, def: 5000, chips: [2500, 5000, 10000, 20000, 40000], unit: 'sq ft', title: 'How large is the building?', sub: 'Approximate wall and roof surface to be insulated.', help: 'Larger buildings often price toward the low end. We confirm after a site assessment.' } }
+  ];
+  const TARGET_ADJ = { 30: 0, 38: 0, 49: 0.25, 60: 0.50 };
+  const ACCESS = { easy: { m: 0.90, t: 'Easy access (−10%)' }, moderate: { m: 1.00, t: '' }, difficult: { m: 1.20, t: 'Difficult access (+20%)' } };
+  const STEP_NAMES = { service: 'Service', size: 'Size', details: 'Details', contact: 'Your estimate', result: 'Estimate' };
+
+  const $ = (id) => document.getElementById(id);
+  const state = { service: null, size: 1500, qty: 1, currentR: '19', targetR: '38', access: 'moderate', step: 'service', leadSent: false };
+  const fmt = (n) => '$' + (Math.round(n / 10) * 10).toLocaleString('en-US');
+  const num = (n) => Number(n).toLocaleString('en-US');
+  const svc = () => SERVICES.find((s) => s.id === state.service);
+  const track = (name, params) => { try { window.gtag && window.gtag('event', name, params || {}); } catch (e) {} };
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function stepPath() {
+    const s = svc();
+    const p = ['service', 'size'];
+    if (!s || s.current || s.target || (s.access && s.kind === 'sqft')) p.push('details');
+    p.push('contact', 'result');
+    return p;
   }
 
-  function fmt(n) {
-    return '$' + Math.round(n).toLocaleString('en-US');
+  /* progress bars + labels */
+  function renderProgress() {
+    const path = stepPath();
+    const total = path.length - 1;               // result is not a numbered step
+    const idx = path.indexOf(state.step);
+    $('wizBars').innerHTML = path.slice(0, total).map((p, i) =>
+      '<span class="' + (state.step === 'result' || i < idx ? 'done' : i === idx ? 'now' : '') + '"></span>').join('');
+    if (state.step === 'result') {
+      $('wizStepText').innerHTML = '<strong>Complete</strong>';
+      $('wizStepName').textContent = 'Your estimate';
+    } else {
+      $('wizStepText').innerHTML = '<strong>Step ' + (idx + 1) + '</strong> of ' + total;
+      $('wizStepName').textContent = STEP_NAMES[state.step];
+    }
   }
 
-  function calculate() {
-    const type     = document.getElementById('insType').value;
-    const sqft     = Math.max(200, parseInt(document.getElementById('sqft').value) || 1500);
-    const currentR = document.getElementById('currentR').value;
-    const targetR  = document.getElementById('targetR').value;
-    const access   = document.getElementById('access').value;
-
-    const rate   = RATES[type];
-    const rMult  = rValueMultiplier(currentR, targetR, type);
-    const accM   = ACCESS_MULT[access];
-
-    const lowTotal  = rate.low  * sqft * rMult * accM;
-    const highTotal = rate.high * sqft * rMult * accM;
-
-    // Build breakdown rows
-    const rows = [
-      ['Service', rate.label],
-      ['Area', sqft.toLocaleString() + ' sq ft'],
-      ['Rate (low – high)', fmt(rate.low * sqft * rMult) + ' – ' + fmt(rate.high * sqft * rMult)],
-      ['Access adjustment', access === 'easy' ? '−10%' : access === 'difficult' ? '+20%' : '—'],
-    ];
-
-    let tHTML = '';
-    rows.forEach(([k, v]) => { tHTML += `<tr><td>${k}</td><td>${v}</td></tr>`; });
-    document.getElementById('breakdownTable').innerHTML = tHTML;
-
-    document.getElementById('resultRange').textContent = fmt(lowTotal) + ' – ' + fmt(highTotal);
-    document.getElementById('resultNote').textContent  =
-      'Estimated installed cost · ' + sqft.toLocaleString() + ' sq ft · ' + rate.label;
-
-    document.getElementById('placeholderPanel').style.display = 'none';
-    document.getElementById('resultPanel').style.display = 'block';
-
-    gtag && gtag('event', 'calculator_used', { service_type: type, sqft: sqft });
-
-    // Reset form if it was previously submitted so user can submit again for a new calculation
-    document.getElementById('leadSuccess').style.display = 'none';
-    document.getElementById('leadFormWrap').style.display = 'block';
-    document.getElementById('leadSubmitBtn').disabled = false;
-    document.getElementById('leadSubmitBtn').textContent = 'Send My Estimate Request →';
+  function show(step, initial) {
+    state.step = step;
+    document.querySelectorAll('.wiz-step').forEach((el) => el.classList.toggle('active', el.dataset.step === step));
+    renderProgress();
+    const active = $('step-' + step);
+    const title = active.querySelector('.wiz-title');
+    if (step === 'size') configureSize();
+    if (step === 'details') configureDetails();
+    if (step === 'contact') $('lockSummary').textContent = summaryText();
+    if (initial) return;
+    if (title) title.focus({ preventScroll: true });
+    const top = $('wiz').getBoundingClientRect().top;
+    if (top < 0 || top > window.innerHeight * 0.5) $('wiz').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    track('calculator_step', { step: step, service: state.service || '' });
+  }
+  function go(dir) {
+    const path = stepPath();
+    const i = path.indexOf(state.step);
+    show(path[Math.max(0, Math.min(path.length - 1, i + dir))]);
   }
 
-  /* ── Lead form submission ── */
-  (function () {
-    const form = document.getElementById('leadForm');
-    if (!form) return;
-
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const nameVal  = document.getElementById('leadName').value.trim();
-      const phoneVal = document.getElementById('leadPhone').value.trim();
-      const emailVal = document.getElementById('leadEmail').value.trim();
-      const errEl    = document.getElementById('leadError');
-      const btn      = document.getElementById('leadSubmitBtn');
-
-      errEl.style.display = 'none';
-
-      if (!nameVal || !phoneVal) {
-        errEl.textContent = 'Name and phone number are required.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      // Build notes from current calculator state
-      const estimateText  = document.getElementById('resultRange').textContent;
-      const estimateNote  = document.getElementById('resultNote').textContent;
-      const serviceLabel  = document.getElementById('insType').options[document.getElementById('insType').selectedIndex].text;
-      const sqft          = document.getElementById('sqft').value;
-      const notes = `Calculator estimate: ${estimateText} | ${estimateNote} | Sqft entered: ${sqft}`;
-
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-
-      try {
-        const res = await fetch('/api/submit-lead', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name:    nameVal,
-            phone:   phoneVal,
-            email:   emailVal,
-            service: serviceLabel,
-            type:    'Calculator',
-            notes:   notes,
-            pageUrl: window.location.href
-          })
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          document.getElementById('leadFormWrap').style.display = 'none';
-          document.getElementById('leadSuccess').style.display  = 'block';
-          gtag && gtag('event', 'lead_submitted', { method: 'calculator', service: serviceLabel });
-        } else {
-          errEl.textContent = 'Something went wrong. Please call us at (832) 291-2738.';
-          errEl.style.display = 'block';
-          btn.disabled = false;
-          btn.textContent = 'Send My Estimate Request →';
-        }
-      } catch {
-        errEl.textContent = 'Network error. Please call us at (832) 291-2738.';
-        errEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Send My Estimate Request →';
-      }
+  /* step 1: service tiles */
+  function buildTiles() {
+    $('svcGrid').innerHTML = SERVICES.map((s) =>
+      '<label class="svc-tile"><input type="radio" name="service" value="' + s.id + '">' +
+      '<span class="svc-ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + IC[s.icon] + '</svg></span>' +
+      '<span><span class="svc-name">' + s.title + '</span><span class="svc-hint" style="display:block">' + s.hint + '<br><strong style="color:var(--teal-900)">' + s.price + '</strong></span></span></label>').join('');
+    $('svcGrid').addEventListener('change', (e) => {
+      if (e.target.name !== 'service') return;
+      state.service = e.target.value;
+      const s = svc();
+      if (s.size) state.size = s.size.def;
+      state.qty = 1;
+      $('svcNext').disabled = false;
+      renderProgress();
     });
+  }
+
+  /* step 2: size */
+  function configureSize() {
+    const s = svc();
+    $('sizeArea').style.display = s.kind === 'fan' ? 'none' : '';
+    $('qtyArea').style.display = s.kind === 'fan' ? '' : 'none';
+    if (s.kind === 'fan') {
+      $('sizeTitle').textContent = 'How many fans do you need?';
+      $('sizeSub').textContent = 'Not sure? Choose 1. We confirm during your free inspection.';
+      $('qtyBig').textContent = state.qty;
+      $('qtyMinus').disabled = state.qty <= 1;
+      $('qtyPlus').disabled = state.qty >= 4;
+      return;
+    }
+    const z = s.size;
+    $('sizeTitle').textContent = z.title;
+    $('sizeSub').textContent = z.sub;
+    $('sizeUnit').textContent = z.unit;
+    $('sizeUnit2').textContent = z.unit;
+    $('sizeMin').textContent = num(z.min);
+    $('sizeMax').textContent = num(z.max);
+    $('sizeHelp').textContent = z.help;
+    ['sizeRange', 'sizeNum'].forEach((id) => { const el = $(id); el.min = z.min; el.max = z.max; el.step = id === 'sizeRange' ? z.step : 1; });
+    $('sizeChips').innerHTML = z.chips.map((c) => '<button type="button" class="chip" data-v="' + c + '">' + num(c) + '</button>').join('');
+    setSize(state.size, true);
+  }
+  function setSize(v, silent) {
+    const z = svc().size;
+    v = Math.max(z.min, Math.min(z.max, Math.round(Number(v) || z.def)));
+    state.size = v;
+    $('sizeBig').textContent = num(v);
+    $('sizeRange').value = v;
+    if (document.activeElement !== $('sizeNum') || silent) $('sizeNum').value = v;
+    document.querySelectorAll('#sizeChips .chip').forEach((c) => c.setAttribute('aria-pressed', String(Number(c.dataset.v) === v)));
+  }
+
+  /* step 3: details */
+  function configureDetails() {
+    const s = svc();
+    $('grpCurrent').style.display = s.current ? '' : 'none';
+    $('grpTarget').style.display = s.target ? '' : 'none';
+    $('grpAccess').style.display = s.access ? '' : 'none';
+    document.querySelector('input[name="currentR"][value="' + state.currentR + '"]').checked = true;
+    document.querySelector('input[name="targetR"][value="' + state.targetR + '"]').checked = true;
+    document.querySelector('input[name="access"][value="' + state.access + '"]').checked = true;
+  }
+
+  /* estimate */
+  function compute() {
+    const s = svc();
+    let low, high, note;
+    const rows = [['Service', s.label]];
+    if (s.kind === 'fan') {
+      const extra = state.qty - 1;
+      low = s.low + extra * s.addLow;
+      high = s.high + extra * s.addHigh;
+      rows.push(['Fans', String(state.qty)]);
+      rows.push(['First fan, installed', '$' + num(s.low) + ' – $' + num(s.high)]);
+      if (extra) rows.push(['Each additional fan', '$' + num(s.addLow) + ' – $' + num(s.addHigh)]);
+      note = state.qty + (state.qty === 1 ? ' fan' : ' fans') + ', unit and labor included';
+    } else if (s.kind === 'flat') {
+      low = s.low; high = s.high;
+      rows.push(['Attic size', num(state.size) + ' sq ft']);
+      rows.push(['Typical flat price', '$' + num(s.low) + ' – $' + num(s.high)]);
+      note = 'Flat price based on the number and type of leaks. We confirm on inspection.';
+    } else {
+      let lo = s.low, hi = s.high;
+      const adj = s.target ? (TARGET_ADJ[state.targetR] || 0) : 0;
+      lo += adj; hi += adj;
+      const a = s.access ? ACCESS[state.access] : { m: 1, t: '' };
+      low = lo * state.size * a.m;
+      high = hi * state.size * a.m;
+      rows.push(['Size', num(state.size) + ' ' + s.size.unit]);
+      rows.push(['Rate', '$' + lo.toFixed(2) + ' – $' + hi.toFixed(2) + ' per sq ft']);
+      if (s.target) rows.push(['Target', 'R-' + state.targetR + (adj ? ' (+$' + adj.toFixed(2) + '/sq ft)' : '')]);
+      if (a.t) rows.push(['Access', a.t]);
+      note = num(state.size) + ' ' + s.size.unit + ' · $' + lo.toFixed(2) + ' – $' + hi.toFixed(2) + ' per sq ft';
+      if (s.id === 'commercial') note += ' · final price set after a site assessment';
+    }
+    return { low, high, rows, note, text: fmt(low) + ' – ' + fmt(high) };
+  }
+  function summaryText() {
+    const s = svc();
+    return s.kind === 'fan' ? s.title + ' · ' + state.qty + (state.qty === 1 ? ' fan' : ' fans')
+      : s.title + ' · ' + num(state.size) + ' ' + s.size.unit;
+  }
+  function renderResult(sent) {
+    const r = compute();
+    $('resRange').textContent = r.text;
+    $('resNote').textContent = r.note;
+    $('resTable').innerHTML = r.rows.map((x) => '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td></tr>').join('');
+    const ok = $('resOk');
+    if (sent) {
+      ok.style.cssText = '';
+      ok.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div><b>Request received.</b> We\'ll call you within 1 business day to confirm your free inspection time.</div>';
+    } else {
+      ok.style.cssText = 'background:#fffaeb;border-color:#fedf89;color:#93370d;';
+      ok.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>We couldn\'t send your request.</b> Please call <a href="tel:+18322912738" style="text-decoration:underline;">(832) 291-2738</a> and we\'ll book your free inspection.</div>';
+    }
+    track('calculator_used', { service_type: state.service, size: state.size, qty: state.qty });
+    show('result');
+  }
+
+  /* step 4: lead capture */
+  function setErr(id, inputId, msg) {
+    $(id).textContent = msg || '';
+    const el = $(inputId);
+    if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+    return !msg;
+  }
+  function validate() {
+    const name = $('fName').value.trim();
+    const digits = $('fPhone').value.replace(/\D/g, '');
+    const phoneOk = digits.length === 10 || (digits.length === 11 && digits[0] === '1');
+    const zip = $('fZip').value.trim();
+    const email = $('fEmail').value.trim();
+    const results = [
+      setErr('eName', 'fName', name.length >= 2 ? '' : 'Please enter your name.'),
+      setErr('ePhone', 'fPhone', phoneOk ? '' : 'Enter a 10-digit phone number.'),
+      setErr('eZip', 'fZip', /^\d{5}$/.test(zip) ? '' : 'Enter a 5-digit ZIP code.'),
+      setErr('eEmail', 'fEmail', !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Check the email address.')
+    ];
+    const bad = ['fName', 'fPhone', 'fZip', 'fEmail'].find((id, i) => !results[i]);
+    if (bad) $(bad).focus();
+    return !bad;
+  }
+  function leadNotes(r) {
+    const s = svc();
+    const parts = ['Calculator estimate: ' + r.text, 'Service: ' + s.label];
+    if (s.kind === 'fan') parts.push('Fans: ' + state.qty);
+    else parts.push('Size: ' + num(state.size) + ' ' + s.size.unit);
+    if (s.current) parts.push('Current insulation: R-' + state.currentR);
+    if (s.target) parts.push('Target: R-' + state.targetR);
+    if (s.access && s.kind === 'sqft') parts.push('Access: ' + state.access);
+    return parts.join(' | ');
+  }
+  async function submitLead(e) {
+    e.preventDefault();
+    if (!validate()) return;
+    const btn = $('leadSubmit');
+    const err = $('formError');
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    const r = compute();
+    const payload = {
+      name: $('fName').value.trim(),
+      phone: $('fPhone').value.trim(),
+      email: $('fEmail').value.trim(),
+      zip: $('fZip').value.trim(),
+      service: svc().label,
+      type: 'Calculator',
+      notes: leadNotes(r),
+      pageUrl: window.location.href,
+      _hp: e.target.elements._hp.value
+    };
+    try {
+      if (window.ICH_SUPABASE && window.ICH_SUPABASE.saveLead) {
+        await window.ICH_SUPABASE.saveLead(payload);
+      } else {
+        const res = await fetch('/api/submit-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error('submit failed');
+      }
+      state.leadSent = true;
+      track('lead_submitted', { method: 'calculator', service: svc().label });
+      btn.disabled = false;
+      btn.innerHTML = 'See My Estimate &rarr;';
+      renderResult(true);
+    } catch (ex) {
+      btn.disabled = false;
+      btn.innerHTML = 'Try Again &rarr;';
+      err.innerHTML = 'We couldn\'t send your request. Check your connection and try again, or call <a href="tel:+18322912738" style="text-decoration:underline;font-weight:700;">(832) 291-2738</a>. <button type="button" id="showAnyway">See my estimate anyway</button>';
+      err.style.display = 'block';
+      $('showAnyway').addEventListener('click', () => renderResult(false));
+    }
+  }
+
+  function restart() {
+    state.service = null; state.qty = 1; state.currentR = '19'; state.targetR = '38'; state.access = 'moderate'; state.leadSent = false;
+    document.querySelectorAll('input[name="service"]').forEach((i) => { i.checked = false; });
+    $('svcNext').disabled = true;
+    $('leadForm').reset();
+    $('formError').style.display = 'none';
+    show('service');
+  }
+
+  /* wiring */
+  (function init() {
+    if (!$('wiz')) return;
+    buildTiles();
+    $('svcNext').addEventListener('click', () => go(1));
+    $('wiz').addEventListener('click', (e) => {
+      if (e.target.closest('[data-next]')) go(1);
+      else if (e.target.closest('[data-back]')) go(-1);
+      const chip = e.target.closest('#sizeChips .chip');
+      if (chip) setSize(chip.dataset.v);
+    });
+    $('sizeRange').addEventListener('input', (e) => setSize(e.target.value));
+    $('sizeNum').addEventListener('input', (e) => { const v = Number(e.target.value); if (v) { state.size = v; $('sizeBig').textContent = num(v); $('sizeRange').value = v; } });
+    $('sizeNum').addEventListener('blur', (e) => setSize(e.target.value, true));
+    $('sizeNum').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); setSize(e.target.value, true); go(1); } });
+    $('qtyMinus').addEventListener('click', () => { state.qty = Math.max(1, state.qty - 1); configureSize(); });
+    $('qtyPlus').addEventListener('click', () => { state.qty = Math.min(4, state.qty + 1); configureSize(); });
+    document.querySelectorAll('input[name="currentR"],input[name="targetR"],input[name="access"]').forEach((i) =>
+      i.addEventListener('change', () => { state[i.name] = i.value; }));
+    $('leadForm').addEventListener('submit', submitLead);
+    $('fPhone').addEventListener('blur', (e) => {
+      const d = e.target.value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+      if (d.length === 10) e.target.value = '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+    });
+    $('restart').addEventListener('click', restart);
+    show('service', true);
   })();
 
   /* ── FAQ accordion ── */
@@ -863,6 +1109,9 @@
   }
 </script>
 
+  <div id="sticky-call-button-container">
+  <a class="sticky-call" href="tel:+18322912738" aria-label="Call us (832) 291-2738"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .58 3.6 1 1 0 0 1-.25 1z"/></svg></span><div><small>Tap to call</small><strong>(832) 291-2738</strong></div></a>
+</div>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/main.js"></script>
 </body>

@@ -1,39 +1,31 @@
 # Insulation Contractor Houston
 
-This is a professional website for Insulation Contractor Houston, specializing in services.
+Static website for Insulation Contractor Houston (insulationcontractorhouston.com).
 
-## Files Included
+## Hosting and local checks
 
-- `index.html` - Homepage
-- `about.html` - About page
-- `contact.html` - Contact page
-- `privacy-policy.html` - Privacy policy page
-- `services/` - Individual service pages
-- `locations/` - Individual location pages
-- `styles.css` - Stylesheet
-- `custom.js` - JavaScript functionality
-- `sitemap.xml` - SEO sitemap
-- `robots.txt` - Search engine directives
-- `.htaccess` - Clean-URL rules for Apache/LiteSpeed hosts (cPanel, SiteGround, Hostinger)
-- `_redirects`, `netlify.toml`, `vercel.json` - Same rules for Netlify / Vercel / Cloudflare Pages
+- **Production:** Vercel. Redirects, clean URLs and security headers live in `vercel.json`. `.vercelignore` keeps internal files out of the deploy.
+- **Local checks:** Netlify CLI (`netlify dev`) using `netlify.toml`, `_redirects` and `netlify/functions/`.
+- **API routes:** `api/` (Vercel edge functions) for lead submission and the admin panel. `netlify/functions/` mirrors them for local runs.
 
-## Setup Instructions
+## Structure
 
-1. Upload all files to your web hosting provider
-2. Ensure all files are in the root directory
-3. **Shared/cPanel hosting:** make sure `.htaccess` uploaded too. It starts with a
-   dot, so file managers hide it by default — turn on "show hidden files" and
-   confirm it sits next to `index.html`. Without it every page except the
-   homepage returns 404.
-4. Test the website functionality
-5. Update contact information as needed
+- `*.html` — pages (services, city pages, calculator, contact, legal); `blog/` — blog posts
+- `assets/` — `global.css`, `js/main.js`, `js/supabase-client.js`, images
+- `admin/` — lead admin panel (noindex)
+- `sitemap.xml`, `robots.txt`, `llms.txt`
 
-## Features
+## Shared header and footer
 
-- Responsive design
-- SEO optimized
-- Professional styling
-- Contact form functionality
-- Mobile-friendly navigation
-- Dynamic service and location pages
-
+The header, footer and sticky call button are identical on every page. Edit the pieces in
+`scripts/layout/` and run:
+
+```
+python scripts/sync-layout.py          # apply to every page
+python scripts/sync-layout.py --check  # report pages that drifted
+```
+
+## Notes
+
+- Main phone number: (832) 291-2738.
+- Prices on pages and in the calculator follow one verified table; change them everywhere together.

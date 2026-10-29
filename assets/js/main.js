@@ -22,7 +22,10 @@ function initNavbar() {
   // (accordion) instead of navigating away — so submenus start collapsed.
   menu.querySelectorAll(".nav-dd > a").forEach((link) => {
     link.addEventListener("click", (event) => {
-      if (!isMobile()) return;
+      if (!isMobile()) {
+        if (link.getAttribute("href") === "#") event.preventDefault(); // dropdown parent, not a page
+        return;
+      }
       event.preventDefault();
       const dd = link.parentElement;
       const wasOpen = dd.classList.contains("open");
@@ -217,7 +220,7 @@ function initLeadForms() {
           form.appendChild(d);
           return d;
         })();
-        errDiv.textContent = 'Something went wrong — please call us directly at +1 409-996-4620.';
+        errDiv.textContent = 'Something went wrong — please call us directly at (832) 291-2738.';
       }
     });
   });

@@ -10,7 +10,7 @@
 
 Implement an advanced, resilient location-capture system that records the real-time physical coordinates (**Latitude, Longitude, Altitude, Accuracy ±X m, and City/Region**) whenever a visitor:
 1. Submits an estimate request form (`contact.html`, home hero form, etc.)
-2. Clicks any phone call button / link (`tel:+14099964620`) across the entire website
+2. Clicks any phone call button / link (`tel:+18322912738`) across the entire website
 
 The captured data will be displayed in the **Admin Console Lead Drawer** matching the exact target design:
 ```text
