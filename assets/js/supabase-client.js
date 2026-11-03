@@ -262,7 +262,7 @@
       const defaults = {
         phone: '(832) 291-2738',
         email: 'info@insulationcontractorhouston.com',
-        address: 'Cypress Farms Ranch Rd, Houston, TX 77429',
+        address: 'Central Park Vista Ln, Houston, TX 77080',
         hours: 'Mon–Sat 8am–6pm'
       };
       try {
