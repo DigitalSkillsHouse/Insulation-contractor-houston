@@ -1063,3 +1063,10 @@ a[href^="tel:"] *{pointer-events:none}
 
 /* Header band color */
 .site-header{background:var(--accent)}
+.sv-card{position:relative;transition:box-shadow .2s,transform .2s,border-color .2s}
+.sv-link{color:inherit;text-decoration:none}
+.sv-link::after{content:"";position:absolute;inset:0;z-index:1}
+.sv-card:has(.sv-link):hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--accent-soft)}
+.sv-card:hover .sv-link{text-decoration:underline;text-underline-offset:3px}
+.sv-card:focus-within{outline:3px solid rgba(var(--accent-rgb),.45);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.sv-card{transition:none}.sv-card:has(.sv-link):hover{transform:none}}
