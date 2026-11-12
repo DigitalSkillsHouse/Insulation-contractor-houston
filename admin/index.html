@@ -148,6 +148,11 @@
             <span>Export CSV</span>
           </button>
 
+          <button class="btn btn-secondary" id="btn-export-json" title="Download a full backup of every lead">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Backup JSON</span>
+          </button>
+
           <button class="btn btn-icon" id="theme-toggle" title="Toggle Theme">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </button>
@@ -273,8 +278,10 @@
                 <option value="Attic Insulation">Attic Insulation</option>
                 <option value="Spray Foam Insulation">Spray Foam Insulation</option>
                 <option value="Injection Foam Insulation">Injection Foam Insulation</option>
+                <option value="Insulation Removal">Insulation Removal</option>
                 <option value="Air Sealing">Air Sealing</option>
                 <option value="Attic Fan & Ventilation">Attic Fan & Ventilation</option>
+                <option value="Commercial Insulation">Commercial Insulation</option>
               </select>
             </div>
           </div>
@@ -315,7 +322,7 @@
                   <th>Timestamp</th>
                   <th>Caller Phone</th>
                   <th>Caller Name</th>
-                  <th>ZIP Code</th>
+                  <th>Approx. Location</th>
                   <th>Source</th>
                 </tr>
               </thead>
@@ -330,8 +337,8 @@
       <!-- View 4: Site Settings -->
       <div class="view-container" id="view-settings">
         <div class="card" style="max-width:640px; margin:0 auto; padding:32px;">
-          <h2 style="font-size:18px; font-weight:800; margin-bottom:6px;">Dispatcher & Site Settings</h2>
-          <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">Updating these settings updates contact info across the site and dispatcher notifications in real time.</p>
+          <h2 style="font-size:18px; font-weight:800; margin-bottom:6px;">Business Settings</h2>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">These details are saved for the admin panel only. Phone, address and hours on the public pages are edited in the site files.</p>
           
           <form id="settings-form">
             <div class="form-group">
@@ -340,7 +347,7 @@
             </div>
 
             <div class="form-group" style="margin-top:16px;">
-              <label for="setting-email">Lead Notification Email *</label>
+              <label for="setting-email">Business Email *</label>
               <input type="email" id="setting-email" required value="info@insulationcontractorhouston.com" placeholder="info@insulationcontractorhouston.com" />
             </div>
 
@@ -351,10 +358,41 @@
 
             <div class="form-group" style="margin-top:16px;">
               <label for="setting-hours">Office Operating Hours</label>
-              <input type="text" id="setting-hours" value="Mon–Fri 9am–6pm" placeholder="Mon–Fri 9am–6pm" />
+              <input type="text" id="setting-hours" value="Mon–Sat 8am–6pm" placeholder="Mon–Sat 8am–6pm" />
             </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top:24px; width:100%; height:42px;">Save & Apply Site Settings</button>
+            <button type="submit" class="btn btn-primary" style="margin-top:24px; width:100%; height:42px;">Save Settings</button>
+          </form>
+        </div>
+
+        <div class="card" style="max-width:640px; margin:24px auto 0; padding:32px;">
+          <h2 style="font-size:18px; font-weight:800; margin-bottom:6px;">Admin Login</h2>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">Signed in as <strong id="account-current-email">-</strong>. Change the email or password you use to sign in. You are signed out afterward and sign in with the new details.</p>
+
+          <form id="account-form" autocomplete="off">
+            <div class="form-group">
+              <label for="account-current">Current Password *</label>
+              <input type="password" id="account-current" required autocomplete="current-password" />
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+              <label for="account-new-email">New Email (leave blank to keep the current one)</label>
+              <input type="email" id="account-new-email" autocomplete="off" placeholder="new-admin@yourdomain.com" />
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+              <label for="account-new-pass">New Password (leave blank to keep it, at least 10 characters)</label>
+              <input type="password" id="account-new-pass" autocomplete="new-password" />
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+              <label for="account-confirm-pass">Confirm New Password</label>
+              <input type="password" id="account-confirm-pass" autocomplete="new-password" />
+            </div>
+
+            <p id="account-message" role="status" aria-live="polite" style="display:none; font-size:13px; margin-top:16px; font-weight:600;"></p>
+
+            <button type="submit" class="btn btn-primary" style="margin-top:24px; width:100%; height:42px;">Update Login</button>
           </form>
         </div>
       </div>

@@ -4,6 +4,17 @@ export const config = { runtime: 'edge' };
 const LEADS_TABLE = 'leads';
 const SETTINGS_TABLE = 'site_settings';
 
+const DEFAULT_SUPABASE_URL = 'https://dqpmyxqpssnpsxrbdysw.supabase.co';
+// The publishable key is public by design (browsers use it too), so it is safe to keep in code.
+const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_xOnT1E3Wlzw1liNEyS3E6w_fCOq8FVy';
+
+// New-style keys (sb_secret_...) go in the apikey header only. Old JWT keys (eyJ...) also need Authorization.
+function keyHeaders(key) {
+  const headers = { 'apikey': key };
+  if (key.startsWith('eyJ')) headers['Authorization'] = `Bearer ${key}`;
+  return headers;
+}
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -11,10 +22,10 @@ function json(data, status = 200) {
   });
 }
 
-async function verifyToken(supabaseUrl, serviceKey, token) {
+async function verifyToken(supabaseUrl, publishableKey, token) {
   const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
-      'apikey': serviceKey,
+      'apikey': publishableKey,
       'Authorization': `Bearer ${token}`
     }
   });
@@ -23,8 +34,7 @@ async function verifyToken(supabaseUrl, serviceKey, token) {
 
 async function dbFetch(supabaseUrl, serviceKey, path, method = 'GET', body, prefer) {
   const headers = {
-    'apikey': serviceKey,
-    'Authorization': `Bearer ${serviceKey}`,
+    ...keyHeaders(serviceKey),
     'Content-Type': 'application/json'
   };
   if (prefer) headers['Prefer'] = prefer;
@@ -34,7 +44,8 @@ async function dbFetch(supabaseUrl, serviceKey, path, method = 'GET', body, pref
 }
 
 export default async function handler(req) {
-  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://obpvzwzttrzqjamaouzh.supabase.co';
+  const SUPABASE_URL = process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || DEFAULT_PUBLISHABLE_KEY;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
   if (!SUPABASE_SERVICE_KEY) return json({ error: 'Service not configured' }, 503);
@@ -49,16 +60,29 @@ export default async function handler(req) {
     const authHeader = req.headers.get('Authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '');
     if (!token) return json({ error: 'Unauthorized' }, 401);
-    const valid = await verifyToken(SUPABASE_URL, SUPABASE_SERVICE_KEY, token).catch(() => false);
+    const valid = await verifyToken(SUPABASE_URL, PUBLISHABLE_KEY, token).catch(() => false);
     if (!valid) return json({ error: 'Unauthorized' }, 401);
   }
 
   try {
     // GET /api/admin?action=leads
     if (action === 'leads' && req.method === 'GET') {
-      const res = await dbFetch(SUPABASE_URL, SUPABASE_SERVICE_KEY, `${LEADS_TABLE}?order=submitted_at.desc`);
-      const data = await res.json();
-      return json(data);
+      // The database returns at most 1000 rows per request, so read page after page until all leads are loaded
+      const PAGE = 1000;
+      const MAX_PAGES = 20;
+      const all = [];
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const res = await dbFetch(
+          SUPABASE_URL, SUPABASE_SERVICE_KEY,
+          `${LEADS_TABLE}?order=submitted_at.desc&limit=${PAGE}&offset=${page * PAGE}`
+        );
+        if (!res.ok) return json({ error: 'Could not load leads' }, 502);
+        const rows = await res.json();
+        if (!Array.isArray(rows)) return json({ error: 'Could not load leads' }, 502);
+        all.push(...rows);
+        if (rows.length < PAGE) break;
+      }
+      return json(all);
     }
 
     // POST /api/admin?action=updateStatus  { leadId, status }

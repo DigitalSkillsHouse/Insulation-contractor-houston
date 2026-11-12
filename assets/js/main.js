@@ -158,6 +158,17 @@ function initReveal() {
   els.forEach(function (el) { io.observe(el); });
 }
 
+function showFormError(form, message) {
+  const errDiv = form.querySelector('.form-error') || (() => {
+    const d = document.createElement('p');
+    d.className = 'form-error';
+    d.style.cssText = 'color:#ef4444;font-size:13px;margin-top:8px;';
+    form.appendChild(d);
+    return d;
+  })();
+  errDiv.textContent = message;
+}
+
 function initLeadForms() {
   document.querySelectorAll('form.contact-form, form.request-card').forEach(form => {
     if (form.__leadHandlerBound) return; // guard against double-registration
@@ -192,6 +203,15 @@ function initLeadForms() {
 
       if (!leadData.name && !leadData.phone) return; // nothing to submit
 
+      // Same phone and ZIP rules as the calculator form
+      const phoneDigits = leadData.phone.replace(/\D/g, '');
+      const phoneOk = !leadData.phone || phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits[0] === '1');
+      const zipOk = !leadData.zip || /^\d{5}$/.test(leadData.zip);
+      if (!phoneOk) { showFormError(form, 'Enter a 10-digit phone number.'); return; }
+      if (!zipOk) { showFormError(form, 'Enter a 5-digit ZIP code.'); return; }
+      const oldError = form.querySelector('.form-error');
+      if (oldError) oldError.textContent = '';
+
       // Disable button + show loading
       if (submit) {
         submit.disabled = true;
@@ -213,14 +233,7 @@ function initLeadForms() {
           submit.disabled = false;
           submit.innerHTML = submit.dataset.origText || 'Request Free Quote →';
         }
-        const errDiv = form.querySelector('.form-error') || (() => {
-          const d = document.createElement('p');
-          d.className = 'form-error';
-          d.style.cssText = 'color:#ef4444;font-size:13px;margin-top:8px;';
-          form.appendChild(d);
-          return d;
-        })();
-        errDiv.textContent = 'Something went wrong — please call us directly at (832) 291-2738.';
+        showFormError(form, 'Something went wrong. Please call us directly at (832) 291-2738.');
       }
     });
   });

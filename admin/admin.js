@@ -13,8 +13,10 @@
     'Attic Insulation',
     'Spray Foam Insulation',
     'Injection Foam Insulation',
+    'Insulation Removal',
     'Air Sealing',
-    'Attic Fan & Ventilation'
+    'Attic Fan & Ventilation',
+    'Commercial Insulation'
   ];
 
   // State Management
@@ -27,46 +29,61 @@
     isAuthenticated: false
   };
 
-  const DUMMY_IDS = new Set(['ICH-1094', 'ICH-1093', 'ICH-1092', 'ICH-1091', 'ICH-1090', 'ICH-1089', 'ICH-1088', 'USA-1094', 'USA-1093', 'USA-1092', 'USA-1091', 'USA-1090', 'USA-1089', 'USA-1088']);
-
   const getSupabase = () => window.ICH_SUPABASE || window.USA_SUPABASE;
+
+  const HOUSTON_TZ = 'America/Chicago';
+  // Phone taps are logged next to leads but are not leads. Totals and charts count real leads only.
+  const isCallTap = (l) => l.type === 'Phone Call Click';
+  const formLeads = () => State.leads.filter((l) => !isCallTap(l));
+  const houstonDayKey = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: HOUSTON_TZ }).format(d);
+
+  function clearCachedLeads() {
+    try {
+      localStorage.removeItem('ich_admin_leads');
+      localStorage.removeItem('usa_admin_leads');
+    } catch (e) { /* storage blocked */ }
+  }
 
   // Initialize Data & Supabase Database Connection
   async function initData() {
-    // Purge cached dummy leads from LocalStorage
-    let saved = [];
-    try {
-      const raw = localStorage.getItem('ich_admin_leads') || localStorage.getItem('usa_admin_leads');
-      if (raw) {
-        saved = JSON.parse(raw).filter(l => !DUMMY_IDS.has(l.id) && l.name !== 'Robert Miller' && l.name !== 'Sarah Jenkins');
-      }
-    } catch (e) { }
+    // Lead details are never kept in the browser. Remove anything an older version stored.
+    clearCachedLeads();
+    State.leads = [];
 
-    State.leads = saved;
-    saveLeads();
-
-    // Fetch live leads strictly from Supabase Database
     const sbClient = getSupabase();
     if (sbClient && typeof sbClient.getLeads === 'function') {
       try {
         const dbLeads = await sbClient.getLeads();
         if (Array.isArray(dbLeads)) {
           State.leads = dbLeads;
-          saveLeads();
           renderAll();
-          console.log('[Admin] Synced with Supabase database:', dbLeads.length, 'leads');
-        } else if (dbLeads === null) {
-          showToast('Notice: Unable to reach database. Displaying cached lead data.', 'warning');
+        } else if (State.isAuthenticated) {
+          showToast('Unable to load leads. Check your connection, or sign in again if your session expired.', 'warning');
         }
       } catch (e) {
-        console.warn('[Admin] Supabase initial sync notice:', e.message);
-        showToast('Notice: Database sync warning. Displaying cached lead data.', 'warning');
+        console.warn('[Admin] Lead load failed:', e.message);
+        if (State.isAuthenticated) showToast('Unable to load leads. Check your connection, or sign in again.', 'warning');
       }
     }
   }
 
   function saveLeads() {
-    localStorage.setItem('ich_admin_leads', JSON.stringify(State.leads));
+    // Intentionally empty: names and phone numbers are not cached in the browser.
+  }
+
+  // Quiet refresh so new leads appear without reloading the page
+  async function refreshLeadsQuietly() {
+    if (!State.isAuthenticated || document.hidden) return;
+    if (DOM.drawer && DOM.drawer.classList.contains('active')) return;
+    const modal = document.getElementById('modal-confirm');
+    if (modal && modal.classList.contains('active')) return;
+    const sbClient = getSupabase();
+    if (!sbClient || typeof sbClient.getLeads !== 'function') return;
+    const fresh = await sbClient.getLeads();
+    if (!Array.isArray(fresh)) return;
+    if (JSON.stringify(fresh) === JSON.stringify(State.leads)) return;
+    State.leads = fresh;
+    renderAll();
   }
 
   // DOM Elements
@@ -97,6 +114,7 @@
     DOM.drawerClose = document.getElementById('drawer-close');
 
     DOM.btnExport = document.getElementById('btn-export-csv');
+    DOM.btnBackup = document.getElementById('btn-export-json');
     DOM.themeToggle = document.getElementById('theme-toggle');
     DOM.btnLogout = document.getElementById('btn-logout');
 
@@ -184,6 +202,9 @@
     if (DOM.btnExport) {
       DOM.btnExport.addEventListener('click', exportToCSV);
     }
+    if (DOM.btnBackup) {
+      DOM.btnBackup.addEventListener('click', exportBackupJSON);
+    }
 
     // Theme Toggle
     if (DOM.themeToggle) {
@@ -218,13 +239,60 @@
         const newSettings = { phone, email, address, hours };
         const sbClient = getSupabase();
 
+        let savedOnServer = false;
         if (sbClient && typeof sbClient.saveSettings === 'function') {
-          await sbClient.saveSettings(newSettings);
+          const result = await sbClient.saveSettings(newSettings);
+          savedOnServer = !!(result && result._saved !== false);
         } else {
           localStorage.setItem('ich_site_settings', JSON.stringify(newSettings));
         }
 
-        showToast('Site Settings saved and applied across the website!', 'success');
+        if (savedOnServer) {
+          showToast('Settings saved for the admin panel. Phone, address and hours on the public pages are edited in the site files.', 'success');
+        } else {
+          showToast('Saved on this device only. The server did not accept the change.', 'error');
+        }
+      });
+    }
+
+    // Change the admin login email and/or password
+    const accountForm = document.getElementById('account-form');
+    if (accountForm) {
+      const accountMsg = document.getElementById('account-message');
+      const setAccountMsg = (text, ok) => {
+        if (!accountMsg) return;
+        accountMsg.textContent = text;
+        accountMsg.style.display = text ? 'block' : 'none';
+        accountMsg.style.color = ok ? 'var(--success)' : 'var(--danger)';
+      };
+      accountForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('account-current').value;
+        const newEmail = document.getElementById('account-new-email').value.trim();
+        const newPassword = document.getElementById('account-new-pass').value;
+        const confirmPassword = document.getElementById('account-confirm-pass').value;
+
+        if (!currentPassword) return setAccountMsg('Enter your current password.', false);
+        if (!newEmail && !newPassword) return setAccountMsg('Enter a new email, a new password, or both.', false);
+        if (newPassword && newPassword.length < 10) return setAccountMsg('The new password must be at least 10 characters.', false);
+        if (newPassword && newPassword !== confirmPassword) return setAccountMsg('The new passwords do not match.', false);
+
+        const btn = accountForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        setAccountMsg('Updating...', true);
+
+        const sbClient = getSupabase();
+        const result = sbClient && typeof sbClient.updateAccount === 'function'
+          ? await sbClient.updateAccount({ currentPassword, newEmail, newPassword })
+          : { ok: false, error: 'The admin service is not loaded. Refresh the page.' };
+
+        if (btn) btn.disabled = false;
+        if (!result.ok) return setAccountMsg(result.error, false);
+
+        accountForm.reset();
+        setAccountMsg('Login updated. Signing you out so you can sign in with the new details.', true);
+        showToast('Admin login updated. Please sign in again.', 'success');
+        setTimeout(() => handleLogout(), 1800);
       });
     }
 
@@ -383,10 +451,13 @@
     } catch (err) {
       console.warn('[Logout Error]:', err.message);
     }
-    // Clear both current and legacy session keys
+    // Clear both current and legacy session keys, and any lead data
     sessionStorage.removeItem('ich_admin_auth');
     localStorage.removeItem('ich_admin_auth');
+    clearCachedLeads();
     State.isAuthenticated = false;
+    State.leads = [];
+    renderAll();
     if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
     showToast('Signed out successfully.');
   }
@@ -456,6 +527,8 @@
             emailEl.title = user.email;
           }
           if (roleEl) roleEl.textContent = 'Authenticated Admin';
+          const acctEl = document.getElementById('account-current-email');
+          if (acctEl) acctEl.textContent = user.email;
           if (avatarEl) avatarEl.textContent = user.email.slice(0, 2).toUpperCase();
         }
       }
@@ -464,10 +537,12 @@
 
   // Calculate & Render Stats
   function renderStats() {
-    const totalLeads = State.leads.length;
-    const phoneCalls = State.leads.filter(l => l.type === 'Phone Call Click').length;
+    // Call taps are tracked on their own. Only real form and calculator leads count as leads.
+    const formLeadList = formLeads();
+    const totalLeads = formLeadList.length;
+    const phoneCalls = State.leads.filter(isCallTap).length;
 
-    const scheduled = State.leads.filter(l => l.status === 'scheduled' || l.status === 'completed').length;
+    const scheduled = formLeadList.filter(l => l.status === 'scheduled' || l.status === 'completed').length;
     const conversionRate = totalLeads ? Math.round((scheduled / totalLeads) * 100) : 0;
 
     document.getElementById('stat-total-leads').textContent = totalLeads;
@@ -479,16 +554,20 @@
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const curr7d = State.leads.filter(l => new Date(l.submitted_at || l.date) >= sevenDaysAgo);
-    const prior7d = State.leads.filter(l => {
+    const curr7d = formLeadList.filter(l => new Date(l.submitted_at || l.date) >= sevenDaysAgo);
+    const prior7d = formLeadList.filter(l => {
       const d = new Date(l.submitted_at || l.date);
       return d >= fourteenDaysAgo && d < sevenDaysAgo;
     });
 
     updateTrendBadge('stat-footer-total-leads', curr7d.length, prior7d.length, 'vs last week');
 
-    const currCalls = curr7d.filter(l => l.type === 'Phone Call Click').length;
-    const priorCalls = prior7d.filter(l => l.type === 'Phone Call Click').length;
+    const callTaps = State.leads.filter(isCallTap);
+    const currCalls = callTaps.filter(l => new Date(l.submitted_at || l.date) >= sevenDaysAgo).length;
+    const priorCalls = callTaps.filter(l => {
+      const d = new Date(l.submitted_at || l.date);
+      return d >= fourteenDaysAgo && d < sevenDaysAgo;
+    }).length;
     updateTrendBadge('stat-footer-phone-calls', currCalls, priorCalls, 'vs last week');
 
     const currConv = curr7d.length ? Math.round((curr7d.filter(l => l.status === 'scheduled' || l.status === 'completed').length / curr7d.length) * 100) : 0;
@@ -517,12 +596,13 @@
     const container = document.getElementById('services-breakdown-body');
     if (!container) return;
 
-    const totalLeads = State.leads.length;
+    const serviceLeads = formLeads();
+    const totalLeads = serviceLeads.length;
     const counts = {};
     SUPPORTED_SERVICES.forEach(s => counts[s] = 0);
 
-    State.leads.forEach(l => {
-      const svc = (l.service === 'Air Sealing & Draft Control' || l.service === 'Air Sealing & Drafts') ? 'Air Sealing' : l.service;
+    serviceLeads.forEach(l => {
+      const svc = l.service;
       if (counts[svc] !== undefined) counts[svc]++;
       else counts[svc] = 1;
     });
@@ -586,7 +666,7 @@
     if (formBadge) formBadge.textContent = formLeadsCount;
     if (phoneBadge) phoneBadge.textContent = phoneCallsCount;
     if (recycleBadge) recycleBadge.textContent = recycleBinCount;
-    if (legacyBadge) legacyBadge.textContent = State.leads.filter(l => l.status === 'new').length;
+    if (legacyBadge) legacyBadge.textContent = State.leads.filter(l => l.status === 'new' && !isCallTap(l)).length;
   }
 
   // Filter Leads
@@ -646,8 +726,8 @@
           </span>
         </td>
         <td>
-          <div>${escapeHTML(l.city || 'Spring Area')}</div>
-          <small style="color:var(--text-dim);">${escapeHTML(l.zip)}</small>
+          <div>${escapeHTML(l.city || 'City not captured')}</div>
+          <small style="color:var(--text-dim);">${escapeHTML(l.zip || 'No ZIP')}</small>
         </td>
         <td>
           ${getStatusBadge(l.status)}
@@ -669,7 +749,7 @@
   // Render Recent Leads (Dashboard Widget)
   function renderRecentLeads() {
     if (!DOM.recentLeadsBody) return;
-    const recent = State.leads.slice(0, 5);
+    const recent = formLeads().slice(0, 5);
 
     DOM.recentLeadsBody.innerHTML = recent.map(l => `
       <tr>
@@ -713,7 +793,7 @@
         <td>${escapeHTML(c.date)}</td>
         <td><a href="tel:${escapeHTML(c.phone)}" style="color:var(--primary); font-weight:700; text-decoration:none;">${escapeHTML(c.phone)}</a></td>
         <td>${escapeHTML(c.name)}</td>
-        <td>${escapeHTML(c.zip)} (${escapeHTML(c.city)})</td>
+        <td>${escapeHTML(c.city || 'Not captured')}</td>
         <td><span class="badge badge-new"><span class="badge-dot"></span> Call Click</span></td>
       </tr>
     `).join('');
@@ -746,7 +826,7 @@
     const isEmailValid = lead.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email);
     document.getElementById('drawer-email').textContent = lead.email || 'N/A';
     document.getElementById('drawer-email-link').href = isEmailValid ? `mailto:${lead.email}` : '#';
-    document.getElementById('drawer-zip').textContent = `${lead.zip} (${lead.city})`;
+    document.getElementById('drawer-zip').textContent = [lead.zip, lead.city].filter(Boolean).join(' · ') || 'Not captured';
     document.getElementById('drawer-service').textContent = lead.service;
     document.getElementById('drawer-date').textContent = lead.date;
 
@@ -757,26 +837,23 @@
     const locCoordsEl = document.getElementById('drawer-loc-coords');
     const locMapLinkEl = document.getElementById('drawer-loc-maplink');
 
-    if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
-      const cityStr = [loc.city || lead.city, loc.region || 'Texas', loc.country || 'United States'].filter(Boolean).join(', ');
-      const srcLabel = loc.source ? ` (${loc.source})` : '';
-      if (locNameEl) locNameEl.textContent = `${cityStr}${srcLabel}`;
-
-      const accStr = loc.accuracy ? `±${loc.accuracy} m` : 'Standard accuracy';
-      const altStr = (loc.altitude !== null && loc.altitude !== undefined) ? ` · Alt: ${loc.altitude} m` : '';
-      if (locAccEl) locAccEl.textContent = `${accStr}${altStr}`;
-
-      const latFixed = Number(loc.latitude).toFixed(5);
-      const lngFixed = Number(loc.longitude).toFixed(5);
-      if (locCoordsEl) locCoordsEl.textContent = `${latFixed}, ${lngFixed}`;
-
+    const hasCoords = !!loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number';
+    if (loc && (loc.city || hasCoords)) {
+      const place = [loc.city || lead.city, loc.region, loc.country].filter(Boolean).join(', ') || 'Location not captured';
+      if (locNameEl) locNameEl.textContent = `${place} (approximate)`;
+      if (locAccEl) locAccEl.textContent = 'Estimated from the visitor IP address, can be several miles off';
+      if (locCoordsEl) locCoordsEl.textContent = hasCoords ? `${loc.latitude}, ${loc.longitude}` : 'Coordinates not available';
       if (locMapLinkEl) {
-        locMapLinkEl.href = loc.maps_url || `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`;
-        locMapLinkEl.style.display = 'inline';
+        if (hasCoords) {
+          locMapLinkEl.href = loc.maps_url || `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`;
+          locMapLinkEl.style.display = 'inline';
+        } else {
+          locMapLinkEl.style.display = 'none';
+        }
       }
     } else {
-      if (locNameEl) locNameEl.textContent = `${lead.city || 'Houston, Texas'} (Estimated)`;
-      if (locAccEl) locAccEl.textContent = 'Approximate Area · No GPS payload';
+      if (locNameEl) locNameEl.textContent = 'Location not captured';
+      if (locAccEl) locAccEl.textContent = 'No location was recorded for this lead';
       if (locCoordsEl) locCoordsEl.textContent = 'Coordinates not captured';
       if (locMapLinkEl) locMapLinkEl.style.display = 'none';
     }
@@ -923,8 +1000,8 @@
           if (proceedBtn) { proceedBtn.disabled = true; proceedBtn.textContent = 'Deleting...'; }
           try {
             const sbClient = getSupabase();
-            if (sbClient && typeof sbClient.deleteLead === 'function') {
-              await sbClient.deleteLead(leadId);
+            if (!sbClient || typeof sbClient.deleteLead !== 'function' || !(await sbClient.deleteLead(leadId))) {
+              throw new Error('The server did not delete the lead');
             }
             State.leads = State.leads.filter(l => l.id !== leadId);
             saveLeads();
@@ -950,8 +1027,8 @@
           if (proceedBtn) { proceedBtn.disabled = true; proceedBtn.textContent = 'Moving...'; }
           try {
             const sbClient = getSupabase();
-            if (sbClient && typeof sbClient.updateStatus === 'function') {
-              await sbClient.updateStatus(leadId, 'cancelled');
+            if (!sbClient || typeof sbClient.updateStatus !== 'function' || !(await sbClient.updateStatus(leadId, 'cancelled'))) {
+              throw new Error('The server did not move the lead');
             }
             lead.status = 'cancelled';
             saveLeads();
@@ -979,14 +1056,11 @@
 
     if (range === '7d') {
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-        const dayStr = d.toISOString().substring(0, 10);
-        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
-        const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const count = State.leads.filter(l => {
-          const lDate = (l.submitted_at || l.date || '').substring(0, 10);
-          return lDate === dayStr;
-        }).length;
+        const d = new Date(now.getTime() - i * 86400000);
+        const dayStr = houstonDayKey(d);
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: HOUSTON_TZ });
+        const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: HOUSTON_TZ });
+        const count = formLeads().filter(l => houstonDayKey(new Date(l.submitted_at || l.date)) === dayStr).length;
 
         points.push({ day: dayLabel, date: dateLabel, count: count });
       }
@@ -995,7 +1069,7 @@
         const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 5) + 1);
         const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 5) + 1);
 
-        const count = State.leads.filter(l => {
+        const count = formLeads().filter(l => {
           const d = new Date(l.submitted_at || l.date);
           return d >= startD && d < endD;
         }).length;
@@ -1011,7 +1085,7 @@
         const endD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7) + 1);
         const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((i + 1) * 7) + 1);
 
-        const count = State.leads.filter(l => {
+        const count = formLeads().filter(l => {
           const d = new Date(l.submitted_at || l.date);
           return d >= startD && d < endD;
         }).length;
@@ -1165,32 +1239,33 @@
   // Export to CSV using Blob instead of a data URI.
   function exportToCSV() {
     const headers = [
-      'ID',
-      'Name',
-      'Phone',
-      'Email',
-      'ZIP',
-      'City',
-      'Service',
-      'Type',
-      'Status',
-      'Date',
-      'Value'
+      'ID', 'Name', 'Phone', 'Email', 'ZIP', 'City', 'Service', 'Type', 'Status', 'Date (Houston time)', 'Value',
+      'Notes', 'Page URL', 'Location Source', 'Location City', 'Location Region', 'Latitude', 'Longitude'
     ];
 
-    const rows = State.leads.map(l => [
-      sanitizeCSV(l.id),
-      sanitizeCSV(l.name),
-      sanitizeCSV(l.phone),
-      sanitizeCSV(l.email),
-      sanitizeCSV(l.zip),
-      sanitizeCSV(l.city),
-      sanitizeCSV(l.service),
-      sanitizeCSV(l.type),
-      sanitizeCSV(l.status),
-      sanitizeCSV(l.date),
-      sanitizeCSV(l.value || 0)
-    ]);
+    const rows = State.leads.map(l => {
+      const loc = l.location_data || {};
+      return [
+        sanitizeCSV(l.id),
+        sanitizeCSV(l.name),
+        sanitizeCSV(l.phone),
+        sanitizeCSV(l.email),
+        sanitizeCSV(l.zip),
+        sanitizeCSV(l.city),
+        sanitizeCSV(l.service),
+        sanitizeCSV(l.type),
+        sanitizeCSV(l.status),
+        sanitizeCSV(l.date),
+        sanitizeCSV(l.value || 0),
+        sanitizeCSV(l.notes),
+        sanitizeCSV(l.page_url),
+        sanitizeCSV(loc.source),
+        sanitizeCSV(loc.city),
+        sanitizeCSV(loc.region),
+        sanitizeCSV(loc.latitude),
+        sanitizeCSV(loc.longitude)
+      ];
+    });
 
     const csvContent =
       '\uFEFF' +
@@ -1216,6 +1291,26 @@
     setTimeout(() => URL.revokeObjectURL(url), 0);
 
     showToast('Leads exported to CSV file successfully!');
+  }
+
+  // Full backup of every lead row exactly as stored. Use it before moving the database.
+  async function exportBackupJSON() {
+    const sbClient = getSupabase();
+    const raw = sbClient && typeof sbClient.getRawLeads === 'function' ? await sbClient.getRawLeads() : null;
+    if (!Array.isArray(raw)) {
+      showToast('Could not download the backup. Sign in again and retry.', 'error');
+      return;
+    }
+    const blob = new Blob([JSON.stringify(raw, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Insulation_Contractor_Houston_Leads_Backup_${new Date().toISOString().substring(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+    showToast(`Backup downloaded: ${raw.length} lead records.`, 'success');
   }
 
   function updateLogos() {
@@ -1263,6 +1358,19 @@
     initSidebarState();
     bindEvents();
     updateLogos();
+
+    // An expired login shows the sign-in screen with a clear message
+    window.addEventListener('ich-session-expired', () => {
+      State.isAuthenticated = false;
+      clearCachedLeads();
+      if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
+      if (DOM.loginError) {
+        DOM.loginError.style.display = 'block';
+        DOM.loginError.textContent = 'Your session expired. Sign in again.';
+      }
+    });
+    setInterval(refreshLeadsQuietly, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshLeadsQuietly(); });
 
     const isAuthenticated = await checkAuth();
     if (isAuthenticated) {

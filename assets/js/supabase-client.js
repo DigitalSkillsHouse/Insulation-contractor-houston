@@ -34,6 +34,12 @@
     if (token) opts.headers['Authorization'] = `Bearer ${token}`;
     if (body && method !== 'GET') opts.body = JSON.stringify(body);
     const res = await fetch(`/api/admin?action=${action}`, opts);
+    if (res.status === 401 && token) {
+      // The login expired: clear it and let the admin panel show the sign-in screen
+      clearSession();
+      window.dispatchEvent(new CustomEvent('ich-session-expired'));
+      throw new Error(`API ${action}: 401`);
+    }
     if (!res.ok) throw new Error(`API ${action}: ${res.status}`);
     return res.json();
   }
@@ -119,85 +125,32 @@
     }
   };
 
-  // Geolocation pre-warmer and high-accuracy capture
-  let _cachedGeo = null;
-  let _geoPromise = null;
-
-  function captureGeolocation() {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(null);
-    if (_cachedGeo && (Date.now() - _cachedGeo.cached_at < 300000)) return Promise.resolve(_cachedGeo);
-    if (_geoPromise) return _geoPromise;
-
-    _geoPromise = new Promise((resolve) => {
-      let done = false;
-      const finish = (val) => {
-        if (!done) {
-          done = true;
-          _cachedGeo = val;
-          _geoPromise = null;
-          resolve(val);
-        }
-      };
-
-      const timer = setTimeout(() => finish(null), 2500);
-
-      try {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            clearTimeout(timer);
-            finish({
-              latitude: Number(pos.coords.latitude.toFixed(6)),
-              longitude: Number(pos.coords.longitude.toFixed(6)),
-              altitude: pos.coords.altitude !== null ? Number(pos.coords.altitude.toFixed(1)) : null,
-              accuracy: Math.round(pos.coords.accuracy),
-              altitudeAccuracy: pos.coords.altitudeAccuracy !== null ? Math.round(pos.coords.altitudeAccuracy) : null,
-              source: 'GPS',
-              cached_at: Date.now()
-            });
-          },
-          () => {
-            clearTimeout(timer);
-            finish(null);
-          },
-          { enableHighAccuracy: true, timeout: 2500, maximumAge: 60000 }
-        );
-      } catch (e) {
-        clearTimeout(timer);
-        finish(null);
-      }
-    });
-
-    return _geoPromise;
+  // Analytics helper: sends a Google Analytics event when gtag is on the page
+  function trackEvent(name, params) {
+    try {
+      if (typeof window.gtag === 'function') window.gtag('event', name, params || {});
+    } catch (e) { /* analytics must never break the page */ }
   }
 
-  // Prewarm location on interaction with forms or call buttons (never on casual scroll)
-  if (typeof window !== 'undefined') {
-    const prewarm = (e) => {
-      const el = e.target;
-      if (el && (el.matches?.('input, textarea, select, a[href^="tel:"], button[type="submit"]') || el.closest?.('form, a[href^="tel:"]'))) {
-        captureGeolocation().catch(() => {});
-        window.removeEventListener('focusin', prewarm);
-        window.removeEventListener('pointerdown', prewarm);
-      }
-    };
-    window.addEventListener('focusin', prewarm, { passive: true });
-    window.addEventListener('pointerdown', prewarm, { passive: true });
+  // Send a call-tap record without waiting for a reply, so it still goes out when the phone dialer opens
+  function sendCallTap(payload) {
+    const body = JSON.stringify(payload);
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon('/api/submit-lead', new Blob([body], { type: 'application/json' }))) return;
+    } catch (e) { /* fall through to fetch */ }
+    fetch('/api/submit-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body,
+      keepalive: true
+    }).catch(() => {});
   }
 
   window.ICH_SUPABASE = {
     getClient: () => mockClient,
 
+    // Location is added on the server from the visitor's IP address. The browser sends no GPS.
     async saveLead(leadData) {
-      if (!leadData.location_data) {
-        // Use cached location or wait up to 1.2s so submission never stalls
-        const loc = _cachedGeo || await Promise.race([
-          captureGeolocation(),
-          new Promise((r) => setTimeout(() => r(null), 1200))
-        ]);
-        if (loc) {
-          leadData.location_data = loc;
-        }
-      }
       const res = await fetch('/api/submit-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -205,7 +158,9 @@
         keepalive: true
       });
       if (!res.ok) throw new Error('Lead submission failed');
-      return res.json();
+      const result = await res.json();
+      trackEvent('generate_lead', { lead_type: leadData.type || 'Form Submission', service: leadData.service || '' });
+      return result;
     },
 
     async getLeads() {
@@ -258,6 +213,33 @@
       }
     },
 
+    // Every lead row exactly as stored, for a full backup
+    async getRawLeads() {
+      try {
+        const data = await adminFetch('leads', 'GET');
+        return Array.isArray(data) ? data : null;
+      } catch (err) {
+        console.warn('[Admin] getRawLeads:', err.message);
+        return null;
+      }
+    },
+
+    // Change the admin login email and/or password
+    async updateAccount({ currentPassword, newEmail, newPassword }) {
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'updateAccount', token: getToken(), currentPassword, newEmail, newPassword })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.error) return { ok: false, error: data.error || 'Could not update the login.' };
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message };
+      }
+    },
+
     getSettings() {
       const defaults = {
         phone: '(832) 291-2738',
@@ -306,13 +288,15 @@
       const current = this.getSettings();
       const updated = { ...current, ...newSettings };
       localStorage.setItem('ich_site_settings', JSON.stringify(updated));
+      let saved = true;
       try {
         await adminFetch('saveSettings', 'POST', updated);
       } catch (e) {
+        saved = false;
         console.warn('[Settings Save]:', e.message);
       }
       this.applySettingsToDOM(updated);
-      return updated;
+      return Object.assign({}, updated, { _saved: saved });
     },
 
     applySettingsToDOM(settings) {
@@ -350,6 +334,33 @@
 
   window.USA_SUPABASE = window.ICH_SUPABASE;
 
+  const SERVICE_ALIASES = {
+    'blown-in attic insulation': 'Attic Insulation',
+    'attic insulation removal': 'Insulation Removal',
+    'air sealing & draft control': 'Air Sealing',
+    'air sealing & drafts': 'Air Sealing',
+    'attic fan installation': 'Attic Fan & Ventilation'
+  };
+
+  // Older leads were saved with different spellings of the same service. Show one name for each.
+  function normalizeService(raw) {
+    const text = String(raw || '').replace(/&amp;/g, '&').trim();
+    if (!text) return 'Attic Insulation';
+    return SERVICE_ALIASES[text.toLowerCase()] || text;
+  }
+
+  // Lead times are stored in UTC. The admin shows Houston time.
+  function formatHoustonTime(iso) {
+    const d = iso ? new Date(iso) : new Date();
+    if (isNaN(d.getTime())) return '';
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(d);
+    const get = (type) => (parts.find((p) => p.type === type) || {}).value || '';
+    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}`;
+  }
+
   function mapLeads(dbLeads) {
     return dbLeads.map(l => {
       let loc = l.location_data || null;
@@ -364,8 +375,8 @@
           const altMatch = m[3].match(/Alt:\s*([\d.]+)/i);
           loc = {
             city: m[1]?.trim() || '',
-            source: m[2]?.trim() || 'GPS',
-            accuracy: accMatch ? Number(accMatch[1]) : 12,
+            source: m[2]?.trim() || 'Not recorded',
+            accuracy: accMatch ? Number(accMatch[1]) : null,
             altitude: altMatch ? Number(altMatch[1]) : null,
             latitude: Number(m[4]),
             longitude: Number(m[5]),
@@ -380,13 +391,14 @@
         phone: l.phone || '',
         email: l.email || '',
         zip: l.zip || '',
-        city: l.city || 'Spring Area, TX',
-        service: l.service || 'Attic Insulation',
+        city: l.city || (loc && loc.city) || '',
+        service: normalizeService(l.service),
         type: l.type || 'Form Submission',
         status: l.status || 'new',
-        date: l.submitted_at ? l.submitted_at.substring(0, 16).replace('T', ' ') : new Date().toISOString().substring(0, 16),
+        date: formatHoustonTime(l.submitted_at),
         submitted_at: l.submitted_at || new Date().toISOString(),
         notes: l.notes || '',
+        page_url: l.page_url || '',
         value: Number(l.value) || 0,
         location_data: loc
       };
@@ -405,20 +417,30 @@
       window.ICH_SUPABASE.fetchSettings();
     }
 
-    document.querySelectorAll('a[href^="tel:"]').forEach(link => {
-      link.addEventListener('click', () => {
-        const phone = link.href.replace('tel:', '');
-        window.ICH_SUPABASE.saveLead({
-          name: 'Phone Caller (Click-to-Call)',
-          phone: phone || '+18322912738',
-          email: '',
-          zip: 'Spring Area',
-          service: 'Phone Inquiry',
-          notes: `Click-to-call from ${window.location.pathname}`,
-          pageUrl: window.location.href,
-          type: 'Phone Call Click',
-          status: 'new'
-        }).catch(err => console.warn('[Call Capture]:', err.message));
+    // Phone taps. One handler for every tel: link, including links added after the page loads.
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest ? event.target.closest('a[href^="tel:"]') : null;
+      if (!link || location.pathname.indexOf('/admin') === 0) return;
+      trackEvent('click_to_call', { page_path: location.pathname });
+
+      // Log the same page only once a minute, so repeat taps do not pile up
+      const key = 'ich_call_tap_' + location.pathname;
+      try {
+        const last = Number(sessionStorage.getItem(key) || 0);
+        if (Date.now() - last < 60000) return;
+        sessionStorage.setItem(key, String(Date.now()));
+      } catch (e) { /* storage blocked: log every tap */ }
+
+      const phone = (link.getAttribute('href') || '').replace('tel:', '');
+      sendCallTap({
+        name: 'Phone Caller (Click-to-Call)',
+        phone: phone || '+18322912738',
+        email: '',
+        zip: '',
+        service: 'Phone Inquiry',
+        notes: `Click-to-call from ${location.pathname}`,
+        pageUrl: location.href,
+        type: 'Phone Call Click'
       });
     });
   });

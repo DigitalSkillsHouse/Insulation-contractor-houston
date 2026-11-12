@@ -1,6 +1,19 @@
 // api/submit-lead.js
 export const config = { runtime: 'edge' };
 
+const ALLOWED_TYPES = ['Form Submission', 'Calculator', 'Phone Call Click'];
+
+const DEFAULT_SUPABASE_URL = 'https://dqpmyxqpssnpsxrbdysw.supabase.co';
+// The publishable key is public by design (browsers use it too), so it is safe to keep in code.
+const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_xOnT1E3Wlzw1liNEyS3E6w_fCOq8FVy';
+
+// New-style keys (sb_secret_...) go in the apikey header only. Old JWT keys (eyJ...) also need Authorization.
+function keyHeaders(key) {
+  const headers = { 'apikey': key };
+  if (key.startsWith('eyJ')) headers['Authorization'] = `Bearer ${key}`;
+  return headers;
+}
+
 function jsonResponse(data, status) {
   return new Response(JSON.stringify(data), {
     status,
@@ -10,13 +23,23 @@ function jsonResponse(data, status) {
   });
 }
 
+function cleanText(value, max) {
+  return (typeof value === 'string' ? value : '').trim().slice(0, max);
+}
+
+// Round to 2 decimals (about 1 km). IP lookups are only approximate, so more digits would be false precision.
+function roundCoord(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n !== 0 ? Math.round(n * 100) / 100 : null;
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   // Resolve environment variables per request in Edge runtime (with fallbacks)
-  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://obpvzwzttrzqjamaouzh.supabase.co';
+  const SUPABASE_URL = process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -46,37 +69,25 @@ export default async function handler(req) {
     return jsonResponse({ error: 'Name or phone required' }, 422);
   }
 
-  // Geolocation handling: client GPS or server-side Vercel edge IP fallback
-  const clientLoc = (body.location_data && typeof body.location_data === 'object') ? body.location_data : {};
-  const ipLat = req.headers.get('x-vercel-ip-latitude');
-  const ipLng = req.headers.get('x-vercel-ip-longitude');
-  const ipCity = req.headers.get('x-vercel-ip-city') ? decodeURIComponent(req.headers.get('x-vercel-ip-city')) : '';
-  const ipRegion = req.headers.get('x-vercel-ip-country-region') || 'TX';
-  const ipCountry = req.headers.get('x-vercel-ip-country') || 'US';
-
-  const parseCoord = (val) => {
-    if (!val) return null;
-    const n = Number(val);
-    return (!isNaN(n) && n !== 0) ? Number(n.toFixed(6)) : null;
-  };
-
-  const hasGps = typeof clientLoc.latitude === 'number' && typeof clientLoc.longitude === 'number' && !isNaN(clientLoc.latitude) && !isNaN(clientLoc.longitude);
-  const finalLat = hasGps ? clientLoc.latitude : parseCoord(ipLat);
-  const finalLng = hasGps ? clientLoc.longitude : parseCoord(ipLng);
+  // Approximate location from the visitor's IP address (Vercel edge headers).
+  // The browser is never asked for GPS. Nothing here is hardcoded: a missing value stays empty.
+  let ipCity = req.headers.get('x-vercel-ip-city') || '';
+  try { ipCity = decodeURIComponent(ipCity); } catch { /* keep the raw header */ }
+  const ipRegion = req.headers.get('x-vercel-ip-country-region') || '';
+  const ipCountry = req.headers.get('x-vercel-ip-country') || '';
+  const lat = roundCoord(req.headers.get('x-vercel-ip-latitude'));
+  const lng = roundCoord(req.headers.get('x-vercel-ip-longitude'));
 
   let locationObj = null;
-  if (finalLat !== null && finalLng !== null) {
+  if (ipCity || (lat !== null && lng !== null)) {
     locationObj = {
-      latitude: finalLat,
-      longitude: finalLng,
-      altitude: hasGps && typeof clientLoc.altitude === 'number' ? clientLoc.altitude : null,
-      accuracy: hasGps && typeof clientLoc.accuracy === 'number' ? clientLoc.accuracy : 5000,
-      altitudeAccuracy: hasGps && typeof clientLoc.altitudeAccuracy === 'number' ? clientLoc.altitudeAccuracy : null,
-      source: hasGps ? 'GPS' : 'IP Geolocation',
-      city: clientLoc.city || ipCity || body.city || 'Houston Area',
-      region: clientLoc.region || ipRegion || 'Texas',
-      country: clientLoc.country || ipCountry || 'United States',
-      maps_url: `https://www.google.com/maps?q=${finalLat},${finalLng}`,
+      source: 'IP (approximate)',
+      city: ipCity || null,
+      region: ipRegion || null,
+      country: ipCountry || null,
+      latitude: lat,
+      longitude: lng,
+      maps_url: (lat !== null && lng !== null) ? `https://www.google.com/maps?q=${lat},${lng}` : null,
       captured_at: new Date().toISOString()
     };
   }
@@ -84,18 +95,20 @@ export default async function handler(req) {
   const generateId = () =>
     'ICH-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
+  const requestedType = cleanText(body.type, 50);
+
   const payload = {
     lead_id:      generateId(),
     name:         (nameVal || 'Anonymous').slice(0, 255),
     phone:        phoneVal.slice(0, 50),
-    email:        (typeof body.email === 'string' ? body.email : '').trim().slice(0, 255),
-    zip:          (typeof body.zip === 'string' ? body.zip : '').trim().slice(0, 20),
-    city:         (typeof body.city === 'string' ? body.city : (locationObj?.city || 'Spring Area, TX')).trim().slice(0, 100),
-    service:      (typeof body.service === 'string' ? body.service : 'Attic Insulation').trim().slice(0, 100),
-    type:         (typeof body.type === 'string' ? body.type : 'Form Submission').trim().slice(0, 50),
+    email:        cleanText(body.email, 255),
+    zip:          cleanText(body.zip, 20),
+    city:         cleanText(body.city, 100) || (locationObj && locationObj.city) || '',
+    service:      cleanText(body.service, 100) || 'Attic Insulation',
+    type:         ALLOWED_TYPES.includes(requestedType) ? requestedType : 'Form Submission',
     status:       'new',
     notes:        (typeof body.notes === 'string' ? body.notes : typeof body.message === 'string' ? body.message : '').trim().slice(0, 5000),
-    page_url:     (typeof body.pageUrl === 'string' ? body.pageUrl : '').trim().slice(0, 2000),
+    page_url:     cleanText(body.pageUrl, 2000),
     submitted_at: new Date().toISOString()
   };
 
@@ -106,32 +119,23 @@ export default async function handler(req) {
   try {
     let res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_SERVICE_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
+      headers: { ...keyHeaders(SUPABASE_SERVICE_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
       let errText = await res.text();
-      // If column location_data doesn't exist yet in Supabase schema, retry with notes fallback
+      // If the location_data column doesn't exist in the database yet, retry with the location written into notes
       if (payload.location_data && errText.includes('location_data')) {
-        const altStr = locationObj.altitude ? ` · Alt: ${locationObj.altitude}m` : '';
-        const locNote = `\n[VISITOR LOCATION: ${locationObj.city}, ${locationObj.region}, ${locationObj.country} (${locationObj.source}) | ±${locationObj.accuracy}m${altStr} | ${locationObj.latitude}, ${locationObj.longitude}]`;
+        const place = [locationObj.city, locationObj.region, locationObj.country].filter(Boolean).join(', ') || 'Unknown';
+        const coords = (lat !== null && lng !== null) ? ` | ${lat}, ${lng}` : '';
+        const locNote = `\n[VISITOR LOCATION: ${place} (IP) | approximate${coords}]`;
         delete payload.location_data;
         payload.notes = ((payload.notes || '') + locNote).slice(0, 5000);
 
         res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
           method: 'POST',
-          headers: {
-            'apikey': SUPABASE_SERVICE_KEY,
-            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
+          headers: { ...keyHeaders(SUPABASE_SERVICE_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
           body: JSON.stringify(payload)
         });
         if (!res.ok) {
@@ -158,4 +162,3 @@ export default async function handler(req) {
     }, 503);
   }
 }
-
