@@ -24,6 +24,8 @@
     leads: [],
     currentFilter: 'all',
     currentServiceFilter: 'all',
+    currentTypeFilter: 'all',
+    loaded: false,
     searchQuery: '',
     selectedLead: null,
     isAuthenticated: false
@@ -65,6 +67,8 @@
         if (State.isAuthenticated) showToast('Unable to load leads. Check your connection, or sign in again.', 'warning');
       }
     }
+    State.loaded = true;
+    renderAll();
   }
 
   function saveLeads() {
@@ -99,8 +103,9 @@
     DOM.views = document.querySelectorAll('.view-container');
 
     DOM.searchInput = document.getElementById('global-search');
-    DOM.filterButtons = document.querySelectorAll('.filter-btn');
+    DOM.filterButtons = document.querySelectorAll('.filter-btn[data-filter]');
     DOM.serviceFilter = document.getElementById('service-filter');
+    DOM.typeFilter = document.getElementById('type-filter');
 
     DOM.leadsTableBody = document.getElementById('leads-table-body');
     DOM.recentLeadsBody = document.getElementById('recent-leads-body');
@@ -186,6 +191,12 @@
     if (DOM.serviceFilter) {
       DOM.serviceFilter.addEventListener('change', (e) => {
         State.currentServiceFilter = e.target.value;
+        renderLeadsTable();
+      });
+    }
+    if (DOM.typeFilter) {
+      DOM.typeFilter.addEventListener('change', (e) => {
+        State.currentTypeFilter = e.target.value;
         renderLeadsTable();
       });
     }
@@ -457,6 +468,7 @@
     clearCachedLeads();
     State.isAuthenticated = false;
     State.leads = [];
+    State.loaded = false;
     renderAll();
     if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
     showToast('Signed out successfully.');
@@ -464,9 +476,19 @@
 
   // View Switcher
   function switchView(viewId, options = {}) {
+    // Search belongs to the Leads list only, so clear it when moving between tabs
+    State.searchQuery = '';
+    if (DOM.searchInput) DOM.searchInput.value = '';
     if (viewId !== 'leads' || !options.keepServiceFilter) {
       State.currentServiceFilter = 'all';
       if (DOM.serviceFilter) DOM.serviceFilter.value = 'all';
+      State.currentTypeFilter = 'all';
+      if (DOM.typeFilter) DOM.typeFilter.value = 'all';
+    }
+    // Coming back from the Recycle Bin must not leave the list stuck on "cancelled"
+    if (viewId === 'leads' && State.currentFilter === 'cancelled') {
+      State.currentFilter = 'all';
+      DOM.filterButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-filter') === 'all'));
     }
 
     DOM.navItems.forEach(item => {
@@ -487,6 +509,8 @@
         v.classList.toggle('active', v.id === `view-${viewId}`);
       });
     }
+
+    if (viewId === 'leads') renderLeadsTable();
 
     const pageTitle = document.getElementById('header-page-title');
     if (pageTitle) {
@@ -537,6 +561,14 @@
 
   // Calculate & Render Stats
   function renderStats() {
+    // Until the first load finishes, show a loading marker instead of misleading zeros
+    if (!State.loaded) {
+      ['stat-total-leads', 'stat-phone-calls', 'stat-conversion-rate'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '...';
+      });
+      return;
+    }
     // Call taps are tracked on their own. Only real form and calculator leads count as leads.
     const formLeadList = formLeads();
     const totalLeads = formLeadList.length;
@@ -674,6 +706,9 @@
     return State.leads.filter(l => {
       // Phone call clicks belong in the Phone Clicks tab only, never form leads
       if (l.type === 'Phone Call Click') return false;
+      // Cancelled leads live in the Recycle Bin, not in the main list
+      if (l.status === 'cancelled' && State.currentFilter !== 'cancelled') return false;
+      if (State.currentTypeFilter !== 'all' && l.type !== State.currentTypeFilter) return false;
       // Status Filter
       if (State.currentFilter !== 'all' && l.status !== State.currentFilter) {
         return false;
@@ -938,6 +973,25 @@
       };
     }
 
+    const drawerRestoreBtn = document.getElementById('drawer-restore-lead');
+    if (drawerRestoreBtn) {
+      drawerRestoreBtn.style.display = lead.status === 'cancelled' ? '' : 'none';
+      drawerRestoreBtn.onclick = async () => {
+        drawerRestoreBtn.disabled = true;
+        const sbClient = getSupabase();
+        const ok = sbClient && typeof sbClient.updateStatus === 'function' ? await sbClient.updateStatus(lead.id, 'new') : false;
+        drawerRestoreBtn.disabled = false;
+        if (ok) {
+          lead.status = 'new';
+          closeDrawer();
+          renderAll();
+          showToast(`Restored lead ${lead.id} to New`, 'success');
+        } else {
+          showToast(`Failed to restore ${lead.id}`, 'error');
+        }
+      };
+    }
+
     const drawerDeleteBtn = document.getElementById('drawer-delete-lead');
     if (drawerDeleteBtn) {
       drawerDeleteBtn.onclick = () => {
@@ -1174,7 +1228,8 @@
           <g class="chart-point-group" data-index="${index}" style="cursor:pointer;">
             <circle cx="${pt.x}" cy="${pt.y}" r="12" fill="transparent" class="hit-area"/>
             <circle cx="${pt.x}" cy="${pt.y}" r="5.5" fill="var(--bg-card)" stroke="#FF5E15" stroke-width="3" class="dot"/>
-            <text x="${pt.x}" y="${height - 10}" fill="var(--text-muted)" font-size="11" text-anchor="middle" font-weight="600">${pt.day}</text>
+            <text x="${pt.x}" y="${pt.y - 14}" fill="var(--text-main)" font-size="11" text-anchor="middle" font-weight="700">${pt.count}</text>
+            <text x="${pt.x}" y="${height - 10}" fill="var(--text-muted)" font-size="11" text-anchor="middle" font-weight="600">${currentChartRange === '7d' ? pt.day : pt.date}</text>
           </g>
         `).join('')}
       </svg>
@@ -1236,6 +1291,12 @@
     return `"${str}"`;
   }
 
+  // Numbers (value, latitude, longitude) are written as plain numbers, not quoted text
+  function numCSV(val) {
+    const n = Number(val);
+    return (val === null || val === undefined || val === '' || !isFinite(n)) ? '""' : String(n);
+  }
+
   // Export to CSV using Blob instead of a data URI.
   function exportToCSV() {
     const headers = [
@@ -1256,14 +1317,14 @@
         sanitizeCSV(l.type),
         sanitizeCSV(l.status),
         sanitizeCSV(l.date),
-        sanitizeCSV(l.value || 0),
+        numCSV(l.value || 0),
         sanitizeCSV(l.notes),
         sanitizeCSV(l.page_url),
         sanitizeCSV(loc.source),
         sanitizeCSV(loc.city),
         sanitizeCSV(loc.region),
-        sanitizeCSV(loc.latitude),
-        sanitizeCSV(loc.longitude)
+        numCSV(loc.latitude),
+        numCSV(loc.longitude)
       ];
     });
 
@@ -1358,10 +1419,12 @@
     initSidebarState();
     bindEvents();
     updateLogos();
+    renderStats();
 
     // An expired login shows the sign-in screen with a clear message
     window.addEventListener('ich-session-expired', () => {
       State.isAuthenticated = false;
+      State.loaded = false;
       clearCachedLeads();
       if (DOM.loginScreen) DOM.loginScreen.style.display = 'flex';
       if (DOM.loginError) {

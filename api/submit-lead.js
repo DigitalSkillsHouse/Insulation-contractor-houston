@@ -33,6 +33,54 @@ function roundCoord(value) {
   return Number.isFinite(n) && n !== 0 ? Math.round(n * 100) / 100 : null;
 }
 
+// Emails the owner about a new lead. It stays off until RESEND_API_KEY and LEAD_ALERT_EMAIL are set.
+// A failed or slow alert never blocks saving the lead.
+async function sendLeadAlert(payload, locationObj) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = (process.env.LEAD_ALERT_EMAIL || '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (!apiKey || !to.length) return;
+
+  const from = process.env.LEAD_ALERT_FROM || 'Insulation Contractor Houston <onboarding@resend.dev>';
+  const oneLine = (text) => String(text || '').replace(/[\r\n]+/g, ' ').trim();
+  const place = locationObj ? [locationObj.city, locationObj.region].filter(Boolean).join(', ') : '';
+  const lines = [
+    `Name: ${oneLine(payload.name)}`,
+    `Phone: ${oneLine(payload.phone)}`,
+    `Email: ${oneLine(payload.email) || 'not given'}`,
+    `ZIP: ${oneLine(payload.zip) || 'not given'}`,
+    `Service: ${oneLine(payload.service)}`,
+    `Type: ${oneLine(payload.type)}`,
+    `Page: ${oneLine(payload.page_url) || 'unknown'}`,
+    `Approximate location (from IP): ${place || 'not available'}`,
+    '',
+    'Notes:',
+    String(payload.notes || '').slice(0, 1000) || '(none)',
+    '',
+    `Lead ID: ${payload.lead_id}`,
+    'Open the admin: https://insulationcontractorhouston.com/admin'
+  ];
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: `New ${payload.type === 'Calculator' ? 'calculator' : 'website'} lead: ${oneLine(payload.name)} (${oneLine(payload.service)})`.slice(0, 200),
+        text: lines.join('\n')
+      }),
+      signal: controller.signal
+    });
+  } catch (e) {
+    console.error('[submit-lead] lead alert failed:', e && e.message);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
@@ -67,6 +115,9 @@ export default async function handler(req) {
   // Required field validation
   if (!nameVal && !phoneVal) {
     return jsonResponse({ error: 'Name or phone required' }, 422);
+  }
+  if (nameVal.length > 100) {
+    return jsonResponse({ error: 'Name is too long. Please use 100 characters or fewer.' }, 422);
   }
 
   // Approximate location from the visitor's IP address (Vercel edge headers).
@@ -148,6 +199,9 @@ export default async function handler(req) {
         return jsonResponse({ error: 'Database error' }, 500);
       }
     }
+
+    // Phone taps are logged but never emailed
+    if (payload.type !== 'Phone Call Click') await sendLeadAlert(payload, locationObj);
 
     return jsonResponse({
       success: true,

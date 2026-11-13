@@ -67,22 +67,39 @@ export default async function handler(req) {
   try {
     // GET /api/admin?action=leads
     if (action === 'leads' && req.method === 'GET') {
-      // The database returns at most 1000 rows per request, so read page after page until all leads are loaded
+      // The database returns at most 1000 rows per request. Read the first page with a total count,
+      // then read the remaining pages at the same time. Ordering by ID as well keeps paging stable
+      // when several leads are saved in the same millisecond.
       const PAGE = 1000;
       const MAX_PAGES = 20;
-      const all = [];
-      for (let page = 0; page < MAX_PAGES; page++) {
-        const res = await dbFetch(
-          SUPABASE_URL, SUPABASE_SERVICE_KEY,
-          `${LEADS_TABLE}?order=submitted_at.desc&limit=${PAGE}&offset=${page * PAGE}`
-        );
-        if (!res.ok) return json({ error: 'Could not load leads' }, 502);
+      const pagePath = (page) => `${LEADS_TABLE}?order=submitted_at.desc,id.desc&limit=${PAGE}&offset=${page * PAGE}`;
+      const readPage = async (page, prefer) => {
+        const res = await dbFetch(SUPABASE_URL, SUPABASE_SERVICE_KEY, pagePath(page), 'GET', undefined, prefer);
+        if (!res.ok) throw new Error('page ' + page + ' failed');
         const rows = await res.json();
-        if (!Array.isArray(rows)) return json({ error: 'Could not load leads' }, 502);
-        all.push(...rows);
-        if (rows.length < PAGE) break;
+        if (!Array.isArray(rows)) throw new Error('page ' + page + ' invalid');
+        return { rows, range: res.headers.get('content-range') };
+      };
+      try {
+        const first = await readPage(0, 'count=exact');
+        const all = first.rows.slice();
+        const match = first.range ? /\/(\d+)$/.exec(first.range) : null;
+        if (match) {
+          const pages = Math.min(MAX_PAGES, Math.ceil(Number(match[1]) / PAGE));
+          const rest = await Promise.all(Array.from({ length: Math.max(0, pages - 1) }, (_, i) => readPage(i + 1)));
+          rest.forEach((r) => all.push(...r.rows));
+        } else if (first.rows.length === PAGE) {
+          // No total was reported: read page after page until a short page arrives
+          for (let page = 1; page < MAX_PAGES; page++) {
+            const next = await readPage(page);
+            all.push(...next.rows);
+            if (next.rows.length < PAGE) break;
+          }
+        }
+        return json(all);
+      } catch (e) {
+        return json({ error: 'Could not load leads' }, 502);
       }
-      return json(all);
     }
 
     // POST /api/admin?action=updateStatus  { leadId, status }

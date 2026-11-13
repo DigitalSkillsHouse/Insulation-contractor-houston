@@ -25,7 +25,7 @@
 <body>
 
   <!-- Login Screen Overlay -->
-  <div class="login-screen" id="login-screen">
+  <div class="login-screen" id="login-screen" style="display:none">
     <div class="login-card">
       <div class="login-brand">
         <img src="/assets/images/logo-footer.webp" alt="Insulation Contractor Houston" class="login-logo" />
@@ -283,6 +283,11 @@
                 <option value="Attic Fan & Ventilation">Attic Fan & Ventilation</option>
                 <option value="Commercial Insulation">Commercial Insulation</option>
               </select>
+              <select id="type-filter" aria-label="Filter by lead type" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); padding:6px 12px; border-radius:var(--radius-sm); font-size:12px; outline:none;">
+                <option value="all">All Types</option>
+                <option value="Form Submission">Form Submission</option>
+                <option value="Calculator">Calculator</option>
+              </select>
             </div>
           </div>
 
@@ -481,6 +486,7 @@
     </div>
 
     <div class="drawer-footer">
+      <button class="btn btn-secondary" id="drawer-restore-lead" style="display:none;">Restore Lead</button>
       <button class="btn btn-secondary" id="drawer-delete-lead" style="color:var(--danger); border-color:rgba(239,68,68,0.3);">Delete Lead</button>
       <button class="btn btn-primary" id="drawer-save-notes" style="flex:1;">Save Notes</button>
     </div>

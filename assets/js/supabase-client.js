@@ -166,7 +166,7 @@
     async getLeads() {
       try {
         const data = await adminFetch('leads', 'GET');
-        if (Array.isArray(data)) return mapLeads(data);
+        if (Array.isArray(data)) return mapLeads(data).sort(newestFirst);
       } catch (err) {
         console.warn('[Admin] getLeads:', err.message);
       }
@@ -334,6 +334,12 @@
 
   window.USA_SUPABASE = window.ICH_SUPABASE;
 
+  // Newest first. Leads saved in the same millisecond keep a fixed order by ID.
+  function newestFirst(a, b) {
+    const byTime = String(b.submitted_at || '').localeCompare(String(a.submitted_at || ''));
+    return byTime || String(b.id).localeCompare(String(a.id));
+  }
+
   const SERVICE_ALIASES = {
     'blown-in attic insulation': 'Attic Insulation',
     'attic insulation removal': 'Insulation Removal',
@@ -418,6 +424,7 @@
     }
 
     // Phone taps. One handler for every tel: link, including links added after the page loads.
+    // It listens in the capture phase, so no other script on the page can stop it from running.
     document.addEventListener('click', (event) => {
       const link = event.target.closest ? event.target.closest('a[href^="tel:"]') : null;
       if (!link || location.pathname.indexOf('/admin') === 0) return;
@@ -442,7 +449,7 @@
         pageUrl: location.href,
         type: 'Phone Call Click'
       });
-    });
+    }, true);
   });
 
 })();

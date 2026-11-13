@@ -1078,3 +1078,10 @@ body.sidebar-collapsed .sidebar-footer .btn-icon {
   }
 }
 
+/* Long names and notes wrap instead of forcing sideways scrolling */
+.lead-table td { overflow-wrap: anywhere; word-break: break-word; }
+.lead-table td:nth-child(2) { max-width: 260px; }
+.drawer-body, .drawer-field { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+
+/* The menu scrolls on short screens, so the Log Out button always stays in view */
+.sidebar-nav { min-height: 0; overflow-y: auto; }
