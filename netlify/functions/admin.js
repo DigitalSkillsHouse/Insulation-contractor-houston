@@ -3,6 +3,8 @@ export const config = { runtime: 'edge' };
 
 const LEADS_TABLE = 'leads';
 const SETTINGS_TABLE = 'site_settings';
+const ALLOWED_STATUSES = ['new', 'contacted', 'scheduled', 'completed', 'cancelled'];
+const SETTINGS_FIELDS = ['phone', 'email', 'address', 'hours'];
 
 const DEFAULT_SUPABASE_URL = 'https://dqpmyxqpssnpsxrbdysw.supabase.co';
 // The publishable key is public by design (browsers use it too), so it is safe to keep in code.
@@ -22,14 +24,32 @@ function json(data, status = 200) {
   });
 }
 
-async function verifyToken(supabaseUrl, publishableKey, token) {
+function getAdminEmails() {
+  const raw = process.env.ADMIN_EMAILS || process.env.LEAD_ALERT_EMAIL || '';
+  return raw.split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+}
+
+function isAllowedAdmin(email) {
+  const list = getAdminEmails();
+  if (!list.length) {
+    console.warn('[admin api] ADMIN_EMAILS is not set — any signed-in Supabase user can use admin. Set ADMIN_EMAILS in Vercel.');
+    return true;
+  }
+  return !!(email && list.includes(String(email).trim().toLowerCase()));
+}
+
+async function verifyAdmin(supabaseUrl, publishableKey, token) {
   const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
       'apikey': publishableKey,
       'Authorization': `Bearer ${token}`
     }
   });
-  return res.ok;
+  if (!res.ok) return null;
+  const user = await res.json();
+  if (!user || !user.email) return null;
+  if (!isAllowedAdmin(user.email)) return null;
+  return user;
 }
 
 async function dbFetch(supabaseUrl, serviceKey, path, method = 'GET', body, prefer) {
@@ -60,8 +80,8 @@ export default async function handler(req) {
     const authHeader = req.headers.get('Authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '');
     if (!token) return json({ error: 'Unauthorized' }, 401);
-    const valid = await verifyToken(SUPABASE_URL, PUBLISHABLE_KEY, token).catch(() => false);
-    if (!valid) return json({ error: 'Unauthorized' }, 401);
+    const user = await verifyAdmin(SUPABASE_URL, PUBLISHABLE_KEY, token).catch(() => null);
+    if (!user) return json({ error: 'Unauthorized' }, 401);
   }
 
   try {
@@ -105,6 +125,8 @@ export default async function handler(req) {
     // POST /api/admin?action=updateStatus  { leadId, status }
     if (action === 'updateStatus' && req.method === 'POST') {
       const { leadId, status } = await req.json();
+      if (!leadId || typeof leadId !== 'string') return json({ error: 'Invalid lead id' }, 400);
+      if (!ALLOWED_STATUSES.includes(status)) return json({ error: 'Invalid status' }, 400);
       const res = await dbFetch(
         SUPABASE_URL, SUPABASE_SERVICE_KEY,
         `${LEADS_TABLE}?lead_id=eq.${encodeURIComponent(leadId)}`,
@@ -116,10 +138,12 @@ export default async function handler(req) {
     // POST /api/admin?action=updateNotes  { leadId, notes }
     if (action === 'updateNotes' && req.method === 'POST') {
       const { leadId, notes } = await req.json();
+      if (!leadId || typeof leadId !== 'string') return json({ error: 'Invalid lead id' }, 400);
+      const cleanNotes = String(notes ?? '').slice(0, 5000);
       const res = await dbFetch(
         SUPABASE_URL, SUPABASE_SERVICE_KEY,
         `${LEADS_TABLE}?lead_id=eq.${encodeURIComponent(leadId)}`,
-        'PATCH', { notes }, 'return=representation'
+        'PATCH', { notes: cleanNotes }, 'return=representation'
       );
       return json({ success: res.ok });
     }
@@ -127,10 +151,13 @@ export default async function handler(req) {
     // POST /api/admin?action=updateValue  { leadId, value }
     if (action === 'updateValue' && req.method === 'POST') {
       const { leadId, value } = await req.json();
+      if (!leadId || typeof leadId !== 'string') return json({ error: 'Invalid lead id' }, 400);
+      const num = Number(value);
+      const safeValue = Number.isFinite(num) ? Math.max(0, Math.min(num, 1_000_000_000)) : 0;
       const res = await dbFetch(
         SUPABASE_URL, SUPABASE_SERVICE_KEY,
         `${LEADS_TABLE}?lead_id=eq.${encodeURIComponent(leadId)}`,
-        'PATCH', { value: Number(value) || 0 }, 'return=representation'
+        'PATCH', { value: safeValue }, 'return=representation'
       );
       return json({ success: res.ok });
     }
@@ -138,6 +165,7 @@ export default async function handler(req) {
     // POST /api/admin?action=deleteLead  { leadId }
     if (action === 'deleteLead' && req.method === 'POST') {
       const { leadId } = await req.json();
+      if (!leadId || typeof leadId !== 'string') return json({ error: 'Invalid lead id' }, 400);
       const res = await dbFetch(
         SUPABASE_URL, SUPABASE_SERVICE_KEY,
         `${LEADS_TABLE}?lead_id=eq.${encodeURIComponent(leadId)}`,
@@ -148,7 +176,7 @@ export default async function handler(req) {
 
     // GET /api/admin?action=settings
     if (action === 'settings' && req.method === 'GET') {
-      const res = await dbFetch(SUPABASE_URL, SUPABASE_SERVICE_KEY, `${SETTINGS_TABLE}?id=eq.1`);
+      const res = await dbFetch(SUPABASE_URL, SUPABASE_SERVICE_KEY, `${SETTINGS_TABLE}?id=eq.1&select=id,phone,email,address,hours,updated_at`);
       const data = await res.json();
       return json(Array.isArray(data) && data.length ? data[0] : null);
     }
@@ -156,10 +184,16 @@ export default async function handler(req) {
     // POST /api/admin?action=saveSettings  { phone, email, address, hours }
     if (action === 'saveSettings' && req.method === 'POST') {
       const settings = await req.json();
+      const safe = { id: 1 };
+      for (const key of SETTINGS_FIELDS) {
+        if (settings[key] !== undefined) {
+          safe[key] = String(settings[key] ?? '').trim().slice(0, 500);
+        }
+      }
       const res = await dbFetch(
         SUPABASE_URL, SUPABASE_SERVICE_KEY,
         SETTINGS_TABLE, 'POST',
-        { id: 1, ...settings }, 'resolution=merge-duplicates'
+        safe, 'resolution=merge-duplicates'
       );
       return json({ success: res.ok });
     }

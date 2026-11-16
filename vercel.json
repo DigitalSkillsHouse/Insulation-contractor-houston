@@ -208,6 +208,66 @@
       "source": "/attic-insulation",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/blown-in-insulation.html",
+      "destination": "/blown-in-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/insulation-removal.html",
+      "destination": "/insulation-removal",
+      "permanent": true
+    },
+    {
+      "source": "/commercial-insulation.html",
+      "destination": "/commercial-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/attic-fan-installation.html",
+      "destination": "/attic-fan-installation",
+      "permanent": true
+    },
+    {
+      "source": "/insulation-cost-calculator.html",
+      "destination": "/insulation-cost-calculator",
+      "permanent": true
+    },
+    {
+      "source": "/cypress-tx-insulation.html",
+      "destination": "/cypress-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/conroe-tx-insulation.html",
+      "destination": "/conroe-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/kingwood-tx-insulation.html",
+      "destination": "/kingwood-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/humble-tx-insulation.html",
+      "destination": "/humble-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/spring-tx-insulation.html",
+      "destination": "/spring-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/the-woodlands-tx-insulation.html",
+      "destination": "/the-woodlands-tx-insulation",
+      "permanent": true
+    },
+    {
+      "source": "/tomball-tx-insulation.html",
+      "destination": "/tomball-tx-insulation",
+      "permanent": true
     }
   ]
 }

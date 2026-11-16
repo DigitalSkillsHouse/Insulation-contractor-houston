@@ -11,9 +11,11 @@ Static website for Insulation Contractor Houston (insulationcontractorhouston.co
 ## Structure
 
 - `*.html` — pages (services, city pages, calculator, contact, legal); `blog/` — blog posts
-- `assets/` — `global.css`, `js/main.js`, `js/supabase-client.js`, images
+- `assets/` — `global.css`, `js/main.js`, `js/supabase-client.js`, `images/` (logos and WebP/JPG site assets)
 - `admin/` — lead admin panel (noindex)
-- `sitemap.xml`, `robots.txt`, `llms.txt`
+- `api/` — serverless lead submission & admin backend functions
+- `docs/` — project documentation, content drafts (`content/`), database schemas (`database/`), raw job photos (`raw-images/`), and archived assets (`archive-images/`)
+- `sitemap.xml`, `robots.txt`, `llms.txt`, `site.webmanifest`, root favicons
 
 ## Shared header and footer
 

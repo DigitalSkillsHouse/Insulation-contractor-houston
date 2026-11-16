@@ -222,12 +222,18 @@ function initLeadForms() {
       try {
         if (window.USA_SUPABASE && typeof window.USA_SUPABASE.saveLead === 'function') {
           await window.USA_SUPABASE.saveLead(leadData);
+        } else {
+          const res = await fetch('/api/submit-lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(leadData),
+            keepalive: true
+          });
+          if (!res.ok) throw new Error('Lead submission failed');
         }
-        // Show success state
         if (success) success.classList.add('visible');
-        if (submit) {
-          submit.innerHTML = 'Request received <span>✓</span>';
-        }
+        if (submit) { submit.innerHTML = 'Request received <span>✓</span>'; }
+        form.reset();
       } catch (err) {
         if (submit) {
           submit.disabled = false;

@@ -5,6 +5,10 @@ const DEFAULT_SUPABASE_URL = 'https://dqpmyxqpssnpsxrbdysw.supabase.co';
 // The publishable key is public by design (browsers use it too), so it is safe to keep in code.
 const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_xOnT1E3Wlzw1liNEyS3E6w_fCOq8FVy';
 
+const RATE_BUCKETS = new Map();
+const RATE_LIMIT = 8;
+const RATE_WINDOW_MS = 60_000;
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -17,6 +21,45 @@ function keyHeaders(key) {
   const headers = { 'apikey': key };
   if (key.startsWith('eyJ')) headers['Authorization'] = `Bearer ${key}`;
   return headers;
+}
+
+function getAdminEmails() {
+  const raw = process.env.ADMIN_EMAILS || process.env.LEAD_ALERT_EMAIL || '';
+  return raw.split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+}
+
+function isAllowedAdmin(email) {
+  const list = getAdminEmails();
+  if (!list.length) {
+    console.warn('[auth] ADMIN_EMAILS is not set — any signed-in user can access admin. Set ADMIN_EMAILS in Vercel.');
+    return true;
+  }
+  return !!(email && list.includes(String(email).trim().toLowerCase()));
+}
+
+function clientIp(req) {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown'
+  );
+}
+
+function allowRequest(ip) {
+  const now = Date.now();
+  let bucket = RATE_BUCKETS.get(ip);
+  if (!bucket || now > bucket.resetAt) {
+    bucket = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    RATE_BUCKETS.set(ip, bucket);
+  }
+  bucket.count += 1;
+  if (RATE_BUCKETS.size > 2000) {
+    for (const [key, val] of RATE_BUCKETS) {
+      if (now > val.resetAt) RATE_BUCKETS.delete(key);
+    }
+  }
+  return bucket.count <= RATE_LIMIT;
 }
 
 export default async function handler(req) {
@@ -32,9 +75,18 @@ export default async function handler(req) {
   const { action } = body;
 
   if (action === 'signIn') {
+    if (!allowRequest(clientIp(req))) {
+      return json({ error: 'Too many sign-in attempts. Please wait a minute.' }, 429);
+    }
     const { email, password } = body;
     if (!email || !password) return json({ error: 'Email and password required' }, 400);
     const cleanEmail = String(email).trim().toLowerCase();
+
+    // Reject non-admin emails before hitting Supabase when an allowlist is configured
+    if (!isAllowedAdmin(cleanEmail)) {
+      return json({ error: 'Invalid credentials' }, 401);
+    }
+
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
       headers: { 'apikey': PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
@@ -52,6 +104,12 @@ export default async function handler(req) {
       }
       return json({ error: errorMsg }, res.status || 401);
     }
+
+    const sessionEmail = (data.user && data.user.email) ? String(data.user.email).toLowerCase() : cleanEmail;
+    if (!isAllowedAdmin(sessionEmail)) {
+      return json({ error: 'Invalid credentials' }, 401);
+    }
+
     return json({ session: { access_token: data.access_token, user: data.user } });
   }
 
@@ -63,6 +121,7 @@ export default async function handler(req) {
     });
     if (!res.ok) return json({ user: null });
     const user = await res.json();
+    if (!isAllowedAdmin(user && user.email)) return json({ user: null });
     return json({ user });
   }
 
@@ -79,6 +138,11 @@ export default async function handler(req) {
     if (cleanNewEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanNewEmail)) return json({ error: 'Enter a valid email address.' }, 400);
     if (cleanNewPassword && cleanNewPassword.length < 10) return json({ error: 'The new password must be at least 10 characters.' }, 400);
 
+    // New login email must already be on the allowlist (add it in Vercel ADMIN_EMAILS first)
+    if (cleanNewEmail && !isAllowedAdmin(cleanNewEmail)) {
+      return json({ error: 'Add this email to ADMIN_EMAILS in Vercel before switching to it.' }, 400);
+    }
+
     // 1. Find out who is signed in
     const meRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: { 'apikey': PUBLISHABLE_KEY, 'Authorization': `Bearer ${token}` }
@@ -86,6 +150,7 @@ export default async function handler(req) {
     if (!meRes.ok) return json({ error: 'Session expired. Sign in again.' }, 401);
     const me = await meRes.json();
     if (!me || !me.id || !me.email) return json({ error: 'Session expired. Sign in again.' }, 401);
+    if (!isAllowedAdmin(me.email)) return json({ error: 'Unauthorized' }, 401);
 
     // 2. Re-check the current password
     const checkRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {

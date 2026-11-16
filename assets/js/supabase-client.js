@@ -438,14 +438,14 @@
         sessionStorage.setItem(key, String(Date.now()));
       } catch (e) { /* storage blocked: log every tap */ }
 
-      const phone = (link.getAttribute('href') || '').replace('tel:', '');
+      const dialed = (link.getAttribute('href') || '').replace('tel:', '');
       sendCallTap({
         name: 'Phone Caller (Click-to-Call)',
-        phone: phone || '+18322912738',
+        phone: '',
         email: '',
         zip: '',
         service: 'Phone Inquiry',
-        notes: `Click-to-call from ${location.pathname}`,
+        notes: `Click-to-call from ${location.pathname}${dialed ? ` (dialed ${dialed})` : ''}`,
         pageUrl: location.href,
         type: 'Phone Call Click'
       });

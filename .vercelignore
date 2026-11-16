@@ -1,6 +1,7 @@
 # Files that must never be published with the website
 .env*
 tools/
+docs/
 site content/
 node_modules/
 netlify/

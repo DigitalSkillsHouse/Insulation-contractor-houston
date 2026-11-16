@@ -4,8 +4,11 @@ export const config = { runtime: 'edge' };
 const ALLOWED_TYPES = ['Form Submission', 'Calculator', 'Phone Call Click'];
 
 const DEFAULT_SUPABASE_URL = 'https://dqpmyxqpssnpsxrbdysw.supabase.co';
-// The publishable key is public by design (browsers use it too), so it is safe to keep in code.
-const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_xOnT1E3Wlzw1liNEyS3E6w_fCOq8FVy';
+
+// Best-effort per-isolate rate limit (Edge). Use Cloudflare/Vercel firewall for hard limits.
+const RATE_BUCKETS = new Map();
+const RATE_LIMIT = 12;
+const RATE_WINDOW_MS = 60_000;
 
 // New-style keys (sb_secret_...) go in the apikey header only. Old JWT keys (eyJ...) also need Authorization.
 function keyHeaders(key) {
@@ -25,6 +28,42 @@ function jsonResponse(data, status) {
 
 function cleanText(value, max) {
   return (typeof value === 'string' ? value : '').trim().slice(0, max);
+}
+
+function clientIp(req) {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown'
+  );
+}
+
+function allowRequest(ip) {
+  const now = Date.now();
+  let bucket = RATE_BUCKETS.get(ip);
+  if (!bucket || now > bucket.resetAt) {
+    bucket = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    RATE_BUCKETS.set(ip, bucket);
+  }
+  bucket.count += 1;
+  if (RATE_BUCKETS.size > 5000) {
+    for (const [key, val] of RATE_BUCKETS) {
+      if (now > val.resetAt) RATE_BUCKETS.delete(key);
+    }
+  }
+  return bucket.count <= RATE_LIMIT;
+}
+
+function phoneLooksValid(phone) {
+  if (!phone) return true;
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 10 || (digits.length === 11 && digits[0] === '1');
+}
+
+function zipLooksValid(zip) {
+  if (!zip) return true;
+  return /^\d{5}$/.test(zip);
 }
 
 // Round to 2 decimals (about 1 km). IP lookups are only approximate, so more digits would be false precision.
@@ -86,9 +125,14 @@ export default async function handler(req) {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
+  if (!allowRequest(clientIp(req))) {
+    return jsonResponse({ error: 'Too many requests. Please try again in a minute.' }, 429);
+  }
+
   // Resolve environment variables per request in Edge runtime (with fallbacks)
   const SUPABASE_URL = process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  // Vercel may still use SUPABASE_KEY; prefer the documented SUPABASE_SERVICE_KEY name.
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     console.error('[submit-lead] Required Supabase environment variables are missing.');
@@ -111,13 +155,23 @@ export default async function handler(req) {
   // Safe string extraction & validation
   const nameVal = (typeof body.name === 'string' ? body.name : String(body.name || '')).trim();
   const phoneVal = (typeof body.phone === 'string' ? body.phone : String(body.phone || '')).trim();
+  const zipVal = cleanText(body.zip, 20);
+  const requestedType = cleanText(body.type, 50);
+  const leadType = ALLOWED_TYPES.includes(requestedType) ? requestedType : 'Form Submission';
+  const isCallTap = leadType === 'Phone Call Click';
 
   // Required field validation
-  if (!nameVal && !phoneVal) {
+  if (!nameVal && !phoneVal && !isCallTap) {
     return jsonResponse({ error: 'Name or phone required' }, 422);
   }
   if (nameVal.length > 100) {
     return jsonResponse({ error: 'Name is too long. Please use 100 characters or fewer.' }, 422);
+  }
+  if (!isCallTap && !phoneLooksValid(phoneVal)) {
+    return jsonResponse({ error: 'Enter a valid 10-digit phone number.' }, 422);
+  }
+  if (!zipLooksValid(zipVal)) {
+    return jsonResponse({ error: 'Enter a valid 5-digit ZIP code.' }, 422);
   }
 
   // Approximate location from the visitor's IP address (Vercel edge headers).
@@ -146,17 +200,18 @@ export default async function handler(req) {
   const generateId = () =>
     'ICH-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
-  const requestedType = cleanText(body.type, 50);
+  // Call taps do not know the visitor's number — do not store the business dialed number as "phone".
+  const storedPhone = isCallTap ? '' : phoneVal.slice(0, 50);
 
   const payload = {
     lead_id:      generateId(),
-    name:         (nameVal || 'Anonymous').slice(0, 255),
-    phone:        phoneVal.slice(0, 50),
+    name:         (nameVal || (isCallTap ? 'Phone Caller (Click-to-Call)' : 'Anonymous')).slice(0, 255),
+    phone:        storedPhone,
     email:        cleanText(body.email, 255),
-    zip:          cleanText(body.zip, 20),
+    zip:          zipVal,
     city:         cleanText(body.city, 100) || (locationObj && locationObj.city) || '',
-    service:      cleanText(body.service, 100) || 'Attic Insulation',
-    type:         ALLOWED_TYPES.includes(requestedType) ? requestedType : 'Form Submission',
+    service:      cleanText(body.service, 100) || (isCallTap ? 'Phone Inquiry' : 'Attic Insulation'),
+    type:         leadType,
     status:       'new',
     notes:        (typeof body.notes === 'string' ? body.notes : typeof body.message === 'string' ? body.message : '').trim().slice(0, 5000),
     page_url:     cleanText(body.pageUrl, 2000),
