@@ -2,8 +2,48 @@
   "cleanUrls": true,
   "redirects": [
     {
+      "source": "/spray-foam-insulation",
+      "destination": "https://insulationcontractorhouston.com/spray-foam-insulation-houston",
+      "permanent": true
+    },
+    {
+      "source": "/blown-in-insulation",
+      "destination": "https://insulationcontractorhouston.com/blown-in-insulation-houston",
+      "permanent": true
+    },
+    {
+      "source": "/injection-foam-insulation",
+      "destination": "https://insulationcontractorhouston.com/injection-foam-insulation-houston",
+      "permanent": true
+    },
+    {
+      "source": "/insulation-removal",
+      "destination": "https://insulationcontractorhouston.com/insulation-removal-houston",
+      "permanent": true
+    },
+    {
+      "source": "/attic-fan-installation",
+      "destination": "https://insulationcontractorhouston.com/attic-fan-installation-houston",
+      "permanent": true
+    },
+    {
+      "source": "/commercial-insulation",
+      "destination": "https://insulationcontractorhouston.com/commercial-insulation-houston",
+      "permanent": true
+    },
+    {
+      "source": "/insulation-cost-calculator",
+      "destination": "https://insulationcontractorhouston.com/insulation-cost-calculator-houston",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.insulationcontractorhouston.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.insulationcontractorhouston.com"
+        }
+      ],
       "destination": "https://insulationcontractorhouston.com/:path*",
       "permanent": true
     }
