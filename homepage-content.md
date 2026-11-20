@@ -38,7 +38,7 @@ Thanks. Our insulation specialist will call shortly to confirm your free estimat
 
 - 01 Free Attic Walkthrough
 - 02 Open Monday to Saturday, 8 AM to 6 PM
-- 03 5.0 stars from 5 [Google reviews](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
+- 03 5.0 stars from 6 [Google reviews](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
 - 04 We call you back the same day
 - 05 Most jobs scheduled within the same week
 
@@ -232,7 +232,7 @@ This owner told us the AC ran all day. When we climbed up, the insulation barely
 
 ## What Houston Homeowners Say About Us
 
-5.0 stars from 5 Google reviews. Here is what Houston homeowners say about our work.
+5.0 stars from 6 Google reviews. Here is what Houston homeowners say about our work.
 
 ### E USA (5 stars)
 
@@ -254,7 +254,7 @@ Great price. Outstanding experience from start to finish! We had our entire home
 
 Great Sevice! got whole home insulated, professional and clean work.
 
-[Read all 5 reviews on Google](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
+[Read all 6 reviews on Google](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
 
 ## FAQ
 

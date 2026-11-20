@@ -1,6 +1,6 @@
 Meta title: Blown In Insulation Houston | Free Walkthrough (46 characters)
 
-Meta description: Blown-in insulation in Houston from $1.00–$2.50/sq ft. Free walkthrough and written estimate. 5.0 stars from 5 Google reviews. Call (832) 291-2738. (147 characters)
+Meta description: Blown-in insulation in Houston from $1.00–$2.50/sq ft. Free walkthrough and written estimate. 5.0 stars from 6 Google reviews. Call (832) 291-2738. (147 characters)
 
 # Blown In Insulation Houston
 
@@ -8,7 +8,7 @@ If your upstairs stays hot and your AC runs all afternoon, your attic is the fir
 
 **Book a free walkthrough**
 
-5.0 stars from 5 Google reviews
+5.0 stars from 6 Google reviews
 
 ## How Blown In Insulation Works
 

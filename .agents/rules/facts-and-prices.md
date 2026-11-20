@@ -52,4 +52,4 @@ These are baseline market prices from the homepage. They are not exact project q
 - **Air Sealing Policy**: Air sealing is quoted and performed **only if leaks are found** during inspection.
 - **Warranties & Rebates**: **No rebates, no warranty**. Never fabricate warranty periods or utility rebate promises.
 - **Licensing Law in Texas**: Never write "Licensed & insured". Texas has **no statewide licence** for insulation contracting.
-- **Google Reviews**: **5.0 stars from 5 reviews**. Always state the exact count of 5 reviews; never inflate or round up to generic counts.
+- **Google Reviews**: **5.0 stars from 6 reviews**. Always state the exact count of 6 reviews; never inflate or round up to generic counts.

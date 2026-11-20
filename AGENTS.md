@@ -116,7 +116,7 @@ Agents must strictly adhere to these verified facts and **never** invent pricing
   - Typical job duration: A normal blown-in job takes **more than one day** from walkthrough to final check.
   - Air sealing policy: Air sealing is done **only if leaks are found** on the walkthrough.
   - Guarantees / Licensing: **No rebates, no warranty**. Never write "Licensed & insured" (Texas has no statewide licence for insulation work).
-- **Google Reviews**: **5.0 stars from 5 reviews**. Always state the exact count; never inflate.
+- **Google Reviews**: **5.0 stars from 6 reviews**. Always state the exact count; never inflate.
 
 ---
 

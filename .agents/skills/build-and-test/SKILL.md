@@ -43,7 +43,7 @@ Run this checklist following every code or content change in this repository. Re
   - Air sealing: $250 – $740 / attic (conditional on leaks)
   - Removal: $1.00 – $1.50 / sq ft
   - Full replacement: $2.00 – $4.00 / sq ft
-- [ ] **Google Reviews Count**: Exactly "5.0 stars from 5 Google reviews" (or 5 reviews). No inflation.
+- [ ] **Google Reviews Count**: Exactly "5.0 stars from 6 Google reviews" (or 6 reviews). No inflation.
 - [ ] **Energy Savings**: EPA ENERGY STAR claims must be 15% heating/cooling, 11% total energy. Never 6% or 9%.
 - [ ] **No Forbidden Claims**: Zero occurrences of "Licensed & insured". No fake warranties or rebates.
 - [ ] **Target R-Value**: R38, approx 15 inches.

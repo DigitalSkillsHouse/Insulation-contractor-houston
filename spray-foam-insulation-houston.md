@@ -1,7 +1,7 @@
 # Spray Foam Insulation Houston
 
 Meta title: Spray Foam Insulation Houston | Free Walkthrough
-Meta description: Spray foam insulation in Houston from $2.00 to $4.50 per sq ft. Free walkthrough and written estimate. 5.0 stars from 5 Google reviews. Call (832) 291 2738.
+Meta description: Spray foam insulation in Houston from $2.00 to $4.50 per sq ft. Free walkthrough and written estimate. 5.0 stars from 6 Google reviews. Call (832) 291 2738.
 
 ## Spray Foam Insulation Houston
 
@@ -9,7 +9,7 @@ When your upstairs stays hot and your AC runs all day, hot attic air leaking dow
 
 Most jobs start within the same week.
 
-5.0 stars from 5 Google reviews. Based in Spring Branch, Houston, TX 77080.
+5.0 stars from 6 Google reviews. Based in Spring Branch, Houston, TX 77080.
 
 ## How Much Does Spray Foam Insulation Cost in Houston?
 
@@ -198,7 +198,7 @@ Yes, mold can grow on the wood behind spray foam when a roof leak traps moisture
 
 ## What Houston Homeowners Say About Our Work
 
-5.0 stars from 5 Google reviews. Here is what Houston homeowners say about our insulation work.
+5.0 stars from 6 Google reviews. Here is what Houston homeowners say about our insulation work.
 
 ### E USA (5 stars)
 
@@ -220,7 +220,7 @@ Great price. Outstanding experience from start to finish! We had our entire home
 
 Great Sevice! got whole home insulated, professional and clean work.
 
-[Read all 5 reviews on Google](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
+[Read all 6 reviews on Google](https://www.google.com/maps/place/Insulation+Contractor+Houston/data=!4m2!3m1!1s0x8640d56de949e41d:0x6b7ba0c9a4975de4)
 
 ## Get a Free Spray Foam Estimate in Houston
 
